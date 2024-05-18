@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Song Recommender</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-title text-center">
+            <h1>Hello <span id="username">User</span></h1>
+        </div>
+        <div class="input-component text-center">
+            <input type="text" class="form-control input-sm" id="songInput" placeholder="Add your favorite (by link / CSV upload)">
+            <button class="btn btn-add btn-custom" onclick="addSong()">Add</button>
+            <label class="btn btn-upload btn-custom btn-file">
+                Upload CSV <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            </label>
+        </div>
+        <div class="list-container">
+            <div id="likedSongsContainer" class="list-group-container">
+                <h2>Favorites</h2>
+                <button class="btn btn-default" onclick="refreshLikedSongs()">Refresh</button>
+                <div id="likedSongsList" class="list-group">
+                    <!-- Dynamically added liked songs will appear here -->
+                </div>
+            </div>
+            <div id="recommendedSongsContainer" class="list-group-container emphasized">
+                <h2>Suggestions for You</h2>
+                <div id="recommendedSongsList" class="list-group">
+                    <!-- Dynamically added recommended songs will appear here -->
+                </div>
+            </div>
+            <div id="dislikedSongsContainer" class="list-group-container">
+                <h2>Not for Me</h2>
+                <div id="dislikedSongsList" class="list-group">
+                    <!-- Dynamically added disliked songs will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
