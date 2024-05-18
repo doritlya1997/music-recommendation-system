@@ -1,0 +1,341 @@
+/* General Styles */
+body {
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.page-title {
+    margin-bottom: 40px;
+    color: #333;
+    text-align: center;
+}
+
+.page-title h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.page-title #username {
+    color: #007bff; /* Blue */
+}
+
+/* Input Component */
+.input-component {
+    margin-bottom: 40px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-component input[type="text"] {
+    width: 40%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: 40px; /* Ensure consistent height */
+}
+
+.input-component .btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff; /* Blue */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 40px; /* Ensure consistent height */
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.input-component .btn:hover {
+    background-color: #0056b3; /* Darker blue */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+    height: 40px; /* Ensure consistent height */
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+/* List Containers */
+.list-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.list-group-container {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-height: 70vh;
+    overflow-y: auto;
+    min-width: 300px;
+    transition: transform 0.3s;
+}
+
+.list-group-container:hover {
+    transform: translateY(-5px);
+}
+
+#likedSongsContainer {
+    border: 2px solid #4CAF50; /* Green */
+    padding: 25px;
+    background-color: #E8F5E9; /* Light green background */
+}
+
+#recommendedSongsContainer {
+    border: 2px solid #2196F3; /* Blue */
+    padding: 25px;
+    background-color: #E3F2FD; /* Light blue background */
+}
+
+#dislikedSongsContainer {
+    border: 2px solid #F44336; /* Red */
+    padding: 25px;
+    background-color: #FFEBEE; /* Light red background */
+}
+
+.list-group-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+#likedSongsContainer h2 {
+    color: #4CAF50; /* Green */
+}
+
+#recommendedSongsContainer h2 {
+    color: #2196F3; /* Blue */
+}
+
+#dislikedSongsContainer h2 {
+    color: #F44336; /* Red */
+}
+
+.list-group-item {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fff;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.item-details span {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.item-details a {
+    color: #007bff; /* Blue */
+    text-decoration: none;
+}
+
+.item-details a:hover {
+    text-decoration: underline;
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.button-group .btn {
+    flex: 1;
+    margin: 0 5px;
+    background-color: #4CAF50; /* Green */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.button-group .btn:hover {
+    background-color: #388E3C; /* Darker green */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button-group .btn-danger {
+    background-color: #F44336; /* Red */
+}
+
+.button-group .btn-danger:hover {
+    background-color: #D32F2F; /* Darker red */
+}
+
+/* General Button Styles */
+.btn {
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn:hover {
+    background-color: #0056b3; /* Darker blue */
+    color: #fff;
+}
+
+/* Accessibility */
+a:focus,
+button:focus,
+input:focus {
+    outline: 2px solid #0056b3; /* Darker blue */
+    outline-offset: 2px;
+}
+/*******/
+/* Style for the input text box */
+#songInput {
+    width: calc(100% - 260px) !important; /* Adjust width to fit buttons */
+    padding: 10px !important;
+    border: 2px solid #ccc !important;
+    border-radius: 4px !important;
+    font-size: 16px !important;
+    transition: border-color 0.3s ease-in-out !important;
+}
+
+#songInput:focus {
+    border-color: #66afe9 !important;
+    outline: none !important;
+}
+
+/* Style for the buttons */
+.btn-custom {
+    padding: 10px 20px !important; /* Adjust padding for better balance */
+    font-size: 18px !important; /* Increase font size for larger text */
+    font-family: Arial, sans-serif !important; /* Arial font */
+    border-radius: 5px !important; /* Slightly rounded corners */
+    background-color: #28a745 !important; /* Green background */
+    color: white !important; /* White text */
+    border: none !important; /* Remove border */
+    margin-left: 10px !important; /* Space between buttons */
+    height: auto !important; /* Ensure consistent height */
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+}
+
+.btn-custom:hover {
+    background-color: #218838 !important; /* Darker green on hover */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2) !important; /* Subtle shadow effect */
+}
+
+.btn-file {
+    position: relative !important;
+    overflow: hidden !important;
+    padding: 10px 20px !important; /* Adjust padding for better balance */
+    font-size: 18px !important; /* Increase font size for larger text */
+    font-family: Arial, sans-serif !important; /* Arial font */
+    border-radius: 5px !important; /* Slightly rounded corners */
+    background-color: #28a745 !important; /* Green background */
+    color: white !important; /* White text */
+    border: none !important; /* Remove border */
+    margin-left: 10px !important; /* Space between buttons */
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+}
+
+.btn-file:hover {
+    background-color: #218838 !important; /* Darker green on hover */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2) !important; /* Subtle shadow effect */
+}
+
+.btn-file input[type="file"] {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    font-size: 100px !important;
+    text-align: right !important;
+    filter: alpha(opacity=0) !important;
+    opacity: 0 !important;
+    outline: none !important;
+    background: white !important;
+    cursor: inherit !important;
+    display: block !important;
+}
+
+/* List Item Details */
+.list-group-item {
+    border-radius: 8px !important; /* Rounded corners for all items */
+    margin-bottom: 10px !important; /* Spacing between items */
+}
+
+/* Background for liked songs */
+#likedSongsList .list-group-item {
+    background: linear-gradient(145deg, #e0f7e9, #f1fff4) !important; /* Light green gradient */
+}
+
+/* Background for recommended songs */
+#recommendedSongsList .list-group-item {
+    background: linear-gradient(145deg, #e0f1f7, #f1faff) !important; /* Light blue gradient */
+}
+
+/* Background for disliked songs */
+#dislikedSongsList .list-group-item {
+    background: linear-gradient(145deg, #f7e0e0, #fff4f4) !important; /* Light red gradient */
+}
+
+.list-group-item .item-details {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important; /* Control spacing between fields */
+}
+
+.song-title {
+    font-weight: bold !important;
+}
+
+.artist-name, .album-name, .release-year {
+    font-style: italic !important;
+    color: #666 !important;
+}
+
+.listen-link {
+    color: #007bff !important;
+    text-decoration: none !important;
+}
+
+.listen-link:hover {
+    text-decoration: underline !important;
+}
