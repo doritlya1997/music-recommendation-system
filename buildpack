@@ -1,2 +1,3 @@
-heroku buildpacks:set https://github.com/moneymeets/python-poetry-buildpack.git
-heroku buildpacks:add heroku/python
+heroku buildpacks:clear
+heroku buildpacks:add --index 1 https://github.com/moneymeets/python-poetry-buildpack.git
+heroku buildpacks:add --index 2 heroku/python
