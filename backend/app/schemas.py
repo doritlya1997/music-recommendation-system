@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class SongBase(BaseModel):
     title: str
     artist: str
@@ -7,8 +8,10 @@ class SongBase(BaseModel):
     year: int
     link: str
 
+
 class SongCreate(SongBase):
     pass
+
 
 class Song(SongBase):
     id: int
