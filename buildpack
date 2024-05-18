@@ -1,0 +1,2 @@
+heroku buildpacks:set https://github.com/moneymeets/python-poetry-buildpack.git
+heroku buildpacks:add heroku/python
