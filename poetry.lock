@@ -507,8 +507,8 @@ python-versions = ">=3.8"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8"
-content-hash = "312edb868a14ee09bb8c7fc1974a1a6eb070f29c8ae87accd9acdd4089ab542a"
+python-versions = "3.8.12"
+content-hash = "50d8bc0fd1426be9327e657214edeeaf9db6974d20e20d88814c7ac84d631087"
 
 [metadata.files]
 annotated-types = [
