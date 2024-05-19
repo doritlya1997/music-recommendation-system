@@ -107,6 +107,7 @@ function likeSong(button) {
         year: songItem.querySelector('.release-year').textContent.replace('(', '').replace(')', ''),
         link: songItem.querySelector('.listen-link').href
     };
+
     appendSongToLiked(songDetails);
     songItem.remove();
 
