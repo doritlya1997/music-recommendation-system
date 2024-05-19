@@ -72,7 +72,6 @@ function generateSongHTML({ song, artist, album, year, link }, actions) {
     `;
 }
 
-
 function appendSongToLiked(songDetails) {
     var likedSongsList = document.getElementById('likedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'liked')"><i class="fa fa-trash"></i> Remove</button>`;
@@ -94,6 +93,11 @@ function appendSongToDisliked(songDetails) {
     dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
+function extractTrackId(link) {
+    const match = link.match(/track\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
+}
+
 function likeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
@@ -105,6 +109,32 @@ function likeSong(button) {
     };
     appendSongToLiked(songDetails);
     songItem.remove();
+
+    // Extract track ID from the link
+    var trackId = extractTrackId(songDetails.link);
+    if (!trackId) {
+        console.error('Invalid Spotify link:', songDetails.link);
+        return;
+    }
+
+    // API call to like the song
+    fetch('/like', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            username: document.getElementById('username').textContent, // Assuming username is displayed here
+            track_id: trackId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Song liked:', data);
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
 
 function dislikeSong(button) {
@@ -118,6 +148,32 @@ function dislikeSong(button) {
     };
     appendSongToDisliked(songDetails);
     songItem.remove();
+
+    // Extract track ID from the link
+    var trackId = extractTrackId(songDetails.link);
+    if (!trackId) {
+        console.error('Invalid Spotify link:', songDetails.link);
+        return;
+    }
+
+    // API call to dislike the song
+    fetch('/dislike', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            username: document.getElementById('username').textContent, // Assuming username is displayed here
+            track_id: trackId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Song disliked:', data);
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
 
 function removeSongFromList(button, listType) {
@@ -147,7 +203,8 @@ function refreshLikedSongs() {
 
 // Example: Load recommended songs
 var recommendedSongs = [
-    { song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/exampleLink1' },
-    { song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/exampleLink2' }
+    { song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
+    { song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
+    { song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
 ];
 recommendedSongs.forEach(song => appendSongToRecommendations(song));

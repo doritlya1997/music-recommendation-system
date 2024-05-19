@@ -5,12 +5,13 @@ description = ""
 authors = ["Haim <Haim.Michalashvili@lusha.com>"]
 
 [tool.poetry.dependencies]
-python = "3.12.3"
+python = "3.12"
 fastapi = "^0.111.0"
 uvicorn = "^0.29.0"
 SQLAlchemy = "^2.0.30"
 pydantic = "^2.7.1"
 python-dotenv = "^1.0.1"
+passlib = "^1.7.4"
 
 [tool.poetry.dev-dependencies]
 
