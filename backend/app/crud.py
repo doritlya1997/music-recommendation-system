@@ -1,5 +1,6 @@
 from .database import get_db
 
+
 def create_user(username: str, hashed_password: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -10,6 +11,7 @@ def create_user(username: str, hashed_password: str):
             conn.commit()
             return user
 
+
 def authenticate_user(username: str, password: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -18,6 +20,7 @@ def authenticate_user(username: str, password: str):
             """, (username,))
             user = cur.fetchone()
             return user
+
 
 def get_likes(username: str):
     with get_db() as conn:
@@ -32,6 +35,7 @@ def get_likes(username: str):
             tracks = cur.fetchall()
             return tracks
 
+
 def get_dislikes(username: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -44,6 +48,7 @@ def get_dislikes(username: str):
             """, (username,))
             tracks = cur.fetchall()
             return tracks
+
 
 def upload_csv(username: str, track_ids: list):
     with get_db() as conn:
@@ -60,6 +65,7 @@ def upload_csv(username: str, track_ids: list):
             conn.commit()
             return True
 
+
 def add_like(username: str, track_id: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -73,6 +79,7 @@ def add_like(username: str, track_id: str):
             """, (user_id, track_id))
             conn.commit()
             return True
+
 
 def add_dislike(username: str, track_id: str):
     with get_db() as conn:
@@ -88,6 +95,7 @@ def add_dislike(username: str, track_id: str):
             conn.commit()
             return True
 
+
 def remove_like(username: str, track_id: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -102,6 +110,7 @@ def remove_like(username: str, track_id: str):
             conn.commit()
             return True
 
+
 def remove_dislike(username: str, track_id: str):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -115,6 +124,7 @@ def remove_dislike(username: str, track_id: str):
             """, (user_id, track_id))
             conn.commit()
             return True
+
 
 def get_recommendations():
     with get_db() as conn:
