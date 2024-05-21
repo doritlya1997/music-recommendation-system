@@ -1,25 +1,75 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from .. import crud, models, schemas
-from ..database import SessionLocal
+from fastapi import APIRouter, HTTPException
+from .. import crud
+from ..utils import hash_password, verify_password
+from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
 router = APIRouter()
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.get("/songs/", response_model=List[schemas.Song])
-def read_songs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    songs = crud.get_songs(db, skip=skip, limit=limit)
-    return songs
+@router.post("/signup")
+def signup(user: User):
+    hashed_password = hash_password(user.password)
+    user = crud.create_user(user.username, hashed_password)
+    if not user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    return user
 
-@router.post("/songs/", response_model=schemas.Song)
-def create_song(song: schemas.SongCreate, db: Session = Depends(get_db)):
-    return crud.create_song(db=db, song=song)
+
+@router.post("/login")
+def login(user: User):
+    user = crud.authenticate_user(user.username, user.password)
+    if not user or not verify_password(user.password, user['hashed_password']):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    return {"username": user['username']}
+
+
+@router.get("/like")
+def get_likes(username: str):
+    return crud.get_likes(username)
+
+
+@router.get("/dislike")
+def get_dislikes(username: str):
+    return crud.get_dislikes(username)
+
+
+@router.post("/like/csv")
+def upload_csv(request: CSVUploadRequest):
+    if not crud.upload_csv(request.username, request.track_ids):
+        raise HTTPException(status_code=400, detail="User not found")
+    return {"status": "200"}
+
+
+@router.post("/like")
+def add_like(request: UserTrackRequest):
+    if not crud.add_like(request.username, request.track_id):
+        raise HTTPException(status_code=400, detail="Track not found")
+    return {"status": "200"}
+
+
+@router.post("/dislike")
+def add_dislike(request: UserTrackRequest):
+    if not crud.add_dislike(request.username, request.track_id):
+        raise HTTPException(status_code=400, detail="Track not found")
+    return {"status": "200"}
+
+
+@router.delete("/like")
+def remove_like(request: UserTrackRequest):
+    if not crud.remove_like(request.username, request.track_id):
+        raise HTTPException(status_code=400, detail="Track not found")
+    return {"status": "200"}
+
+
+@router.delete("/dislike")
+def remove_dislike(request: UserTrackRequest):
+    if not crud.remove_dislike(request.username, request.track_id):
+        raise HTTPException(status_code=400, detail="Track not found")
+    return {"status": "200"}
+
+
+@router.get("/recommendation", response_model=List[Track])
+def get_recommendations():
+    return crud.get_recommendations()

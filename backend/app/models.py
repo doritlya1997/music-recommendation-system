@@ -1,12 +1,24 @@
-from sqlalchemy import Column, Integer, String
-from .database import Base
+from pydantic import BaseModel
 
 
-class Song(Base):
-    __tablename__ = "songs"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    artist = Column(String, index=True)
-    album = Column(String)
-    year = Column(Integer)
-    link = Column(String)
+class User(BaseModel):
+    username: str
+    password: str
+
+
+class Track(BaseModel):
+    track_id: str
+    track_name: str
+    artist_name: str
+    year: int
+    relevance_percentage: float
+
+
+class UserTrackRequest(BaseModel):
+    username: str
+    track_id: str
+
+
+class CSVUploadRequest(BaseModel):
+    username: str
+    track_ids: list[str]

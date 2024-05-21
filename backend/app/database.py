@@ -1,9 +1,18 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from contextlib import contextmanager
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"  # Example with SQLite
+load_dotenv()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+@contextmanager
+def get_db():
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    try:
+        yield conn
+    finally:
+        conn.close()

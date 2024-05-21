@@ -1,13 +1,9 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from .database import engine, Base
 from .routers import songs
 
 app = FastAPI()
-
-# Create the database tables
-Base.metadata.create_all(bind=engine)
 
 # Include the router
 app.include_router(songs.router)
