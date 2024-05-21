@@ -1,5 +1,12 @@
 # music-recommendation-system
 
+### Heroku commands for Deployment
+```
+heroku login
+git push heroku main
+heroku open -a music-application
+```
+
 ### Installation for Devs:
 ````
 brew install poetry
