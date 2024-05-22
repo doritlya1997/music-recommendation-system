@@ -3,6 +3,7 @@
 ### Heroku commands for Deployment
 ```
 heroku login
+heroku git:remote -a music-application
 git push heroku main
 heroku open -a music-application
 ```
@@ -14,6 +15,7 @@ poetry config virtualenvs.in-project true
 poetry install
 brew tap heroku/brew && brew install heroku
 
+
 heroku login
 heroku create music-recommendation-system
 ````
@@ -23,7 +25,7 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
 
 - Download the dataset from the link (https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------)
 - Place the dataset here: `scripts/data/spotify_data.csv`
-- Add a `scripts/secrets.py` file with your database credentials:
+- Add a `scripts/secrets1.py` file with your database credentials:
   ```
   DB_USER = "..."
   DB_PASSWORD = "..."

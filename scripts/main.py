@@ -1,3 +1,6 @@
+from functools import partial
+
+import pandas
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 from tempfile import TemporaryDirectory
@@ -10,7 +13,8 @@ from pyspark.sql import functions as F
 import pandas as pd
 from pyspark.ml.feature import MinMaxScaler, VectorAssembler
 from pyspark.ml.functions import vector_to_array
-import secrets
+import secrets1
+
 
 def config_spark():
     tmpdir = TemporaryDirectory()
@@ -223,8 +227,6 @@ def process_data_write_csv_just_spark(spark: SparkSession):
 
         feat_vec = feat_vec.drop('features', 'scaled_features')
 
-
-
         # add min and max values for each row to establish min and max values, then once scaling is done, remove min and max columns
         #             min_row = {'popularity': '0', 'loudness': '-60', 'tempo': '0'}
         #             max_row = {'popularity': '100', 'loudness': '0', 'tempo': '250'}
@@ -251,7 +253,7 @@ def process_data_write_csv_just_spark(spark: SparkSession):
         # spark_df = spark.createDataFrame(pandas_df)
         # spark_df.printSchema()
         # spark_df.show()
-        feat_vec.write.mode("overwrite").csv(f"./data_ready_for_db.csv", header=True)
+        feat_vec.write.mode("overwrite").parquet(f"./data_ready_for_db_parquet")
 
 
     schemaaa = """
@@ -301,7 +303,7 @@ def validate_result(spark):
 def write_data_to_postgres(spark: SparkSession):
 
     def process_batch(df, epoch_id):
-        jdbc_url = f"jdbc:postgresql://{secrets.DB_HOST}:{secrets.DB_PORT}/{secrets.DB_NAME}"
+        jdbc_url = f"jdbc:postgresql://{secrets1.DB_HOST}:{secrets1.DB_PORT}/{secrets1.DB_NAME}"
 
         df.show()
         print(df.count())
@@ -311,8 +313,8 @@ def write_data_to_postgres(spark: SparkSession):
             .option("url", jdbc_url)
             .option("driver", "org.postgresql.Driver")
             .option("dbtable", "tracks")
-            .option("user", secrets.DB_USER)
-            .option("password", secrets.DB_PASSWORD)
+            .option("user", secrets1.DB_USER)
+            .option("password", secrets1.DB_PASSWORD)
             .save())
     from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
 
@@ -440,16 +442,241 @@ def try_feature_scaler(spark: SparkSession):
 
 
 def preprocess(spark: SparkSession):
-    get_track_id_counts(spark)
-    drop_duplicate_track_id_songs(spark)
+    # get_track_id_counts(spark)
+    # drop_duplicate_track_id_songs(spark)
     process_data_write_csv_just_spark(spark)
-    validate_result(spark)
-    write_data_to_postgres(spark)
+    # validate_result(spark)
+    # write_data_to_postgres(spark)
+
+############### QUERY DB
+
+import psycopg2
+from IPython.display import display
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from contextlib import contextmanager
+import glob
+
+
+@contextmanager
+def get_db(DATABASE_URL):
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+def query_db(query) -> pandas.DataFrame:
+    DATABASE_URL="postgres://ghiabcwcxsyfvo:9de383d33fe38cec6d6bb1f41fa313df2f054cc6091bd08cb018f02e74c0cdd7@ec2-34-252-152-193.eu-west-1.compute.amazonaws.com:5432/d9mck4patkc46n"
+
+    with get_db(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(query)
+            except (Exception, psycopg2.DatabaseError) as error:
+                print("Error: %s" % error)
+                cur.close()
+                return 1
+            # The execute returns a list of tuples:
+            tuples_list = cur.fetchall()
+            cur.close()
+
+            columns = [
+                "track_id",
+                "id",
+                "artist_name",
+                "track_name",
+                "popularity",
+                "genre",
+                "danceability",
+                "energy",
+                "key",
+                "loudness",
+                "mode",
+                "speechiness",
+                "acousticness",
+                "instrumentalness",
+                "liveness",
+                "valence",
+                "tempo",
+                "duration_ms",
+                "time_signature",
+                "year_2000_2004",
+                "year_2005_2009",
+                "year_2010_2014",
+                "year_2015_2019",
+                "year_2020_2024",
+                "update_timestamp"
+            ]
+
+            # Now we need to transform the list into a pandas DataFrame:
+            df = pd.DataFrame(tuples_list, columns=columns)
+            display(df)
+            return df
+
+
+def weighted_mean(df, col="update_timestamp"):
+    # print(df.dtypes)
+    date_col = df[col]
+    quantiles_values = date_col.quantile([0.25, 0.5, 0.75], interpolation="nearest")
+    # print(quantiles_values)
+
+    # calculate each quantile mean and multiply be matching weight
+    # the later the records, the bigger the weight
+    first_quantile_df = df[df[col] <= quantiles_values[0.25]].mean().drop(col).mul(1)
+    second_quantile_df = df[(df[col] > quantiles_values[0.25]) & (df[col] <= quantiles_values[0.5])].mean().drop(col).mul(2)
+    third_quantile_df = df[(df[col] > quantiles_values[0.5]) & (df[col] <= quantiles_values[0.75])].mean().drop(col).mul(3)
+    fourth_quantile_df = df[df[col] > quantiles_values[0.75]].mean().drop(col).mul(4)
+
+    # print("first")
+    # display(first_quantile_df)
+    # print("second")
+    # display(second_quantile_df)
+    # print("third")
+    # display(third_quantile_df)
+    # print("fourth")
+    # display(fourth_quantile_df)
+
+    all_quantile_df = pd.DataFrame({
+        'first': first_quantile_df,
+        'second': second_quantile_df,
+        'third': third_quantile_df,
+        'fourth': fourth_quantile_df})
+
+    all_quantile_df = all_quantile_df.mean(axis=1)
+    return all_quantile_df
+
+
+from sklearn.metrics.pairwise import cosine_similarity
+def get_recommandations(user_id=2):
+    cols_for_similarity = [
+        "acousticness",
+        "danceability",
+        "energy",
+        "instrumentalness",
+        "liveness",
+        "loudness",
+        "mode",
+        "popularity",
+        "speechiness",
+        "tempo",
+        "valence",
+        "year_2000_2004",
+        "year_2005_2009",
+        "year_2010_2014",
+        "year_2015_2019",
+        "year_2020_2024",
+        "update_timestamp"
+    ]
+    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'time_signature', 'track_id', 'track_name']
+
+    tracks_df = pd.concat(map(partial(pd.read_parquet),
+                       glob.glob("./data_ready_for_db_parquet/*.parquet")))
+    tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
+    tracks_other_cols_df = tracks_df[other_cols]
+    display(tracks_df)
+
+    user_likes_playlist = query_db(f"""
+        select tracks.*, update_timestamp
+        from likes
+        join tracks on likes.track_id = tracks.track_id
+        where user_id = {user_id}; """)
+
+    user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
+    user_likes_other_cols_df = user_likes_playlist[other_cols]
+    column_averages = weighted_mean(user_likes_similarity_df)
+    user_likes_similarity_df_mean = pd.DataFrame([column_averages], index=['Average'])
+
+    # display(user_likes_similarity_df_mean)
+
+    tracks_similarity_df = tracks_similarity_df.sort_index(axis=1)
+    user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
+
+    similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
+    tracks_similarity_df['similarity_score'] = similarity_scores
+
+    # TODO: join `tracks_other_cols_df` back
+    # Reset indices to ensure uniqueness
+    tracks_similarity_df = tracks_similarity_df.reset_index(drop=True)
+    tracks_other_cols_df = tracks_other_cols_df.reset_index(drop=True)
+    display(tracks_similarity_df)
+    display(tracks_other_cols_df)
+    scored_tracks_df = pd.concat([tracks_similarity_df, tracks_other_cols_df], axis=1, join='inner')
+
+    top_similarities = scored_tracks_df.sort_values(by='similarity_score', ascending=False)
+    top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'similarity_score']]
+    print("top_similarities")
+    display(top_similarities)
+
+
+
+def sandbox():
+    cols_for_similarity = [
+        "acousticness",
+        "danceability",
+        "energy",
+        "genre_acoustic",
+        "genre_hip-hop",
+        "genre_indie",
+        "genre_piano",
+        "genre_pop",
+        "genre_rock",
+        "instrumentalness",
+        "liveness",
+        "loudness",
+        "mode",
+        "popularity",
+        "speechiness",
+        "tempo",
+        "track_id",
+        "valence",
+        "year_2000-2004",
+        "year_2005-2009",
+        "year_2010-2014",
+        "year_2015-2019",
+        "year_2020-2023"
+    ]
+
+    all_cols = [
+        "track_id",
+        "id",
+        "artist_name",
+        "track_name",
+        "popularity",
+        "genre",
+        "danceability",
+        "energy",
+        "key",
+        "loudness",
+        "mode",
+        "speechiness",
+        "acousticness",
+        "instrumentalness",
+        "liveness",
+        "valence",
+        "tempo",
+        "duration_ms",
+        "time_signature",
+        "year_2000_2004",
+        "year_2005_2009",
+        "year_2010_2014",
+        "year_2015_2019",
+        "year_2020_2024",
+        "update_timestamp"
+    ]
+
+    difference = sorted(list(set(all_cols) - set(cols_for_similarity)))
+
+    print(difference)
 
 
 if __name__ == "__main__":
-    spark = config_spark()
+    # spark = config_spark()
     print("hello")
-    preprocess(spark)
+    # preprocess(spark)
     print("end")
+    get_recommandations()
+
+
 

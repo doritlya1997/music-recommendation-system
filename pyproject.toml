@@ -18,6 +18,9 @@ delta-spark = "3.1.0"
 scikit-learn = "^1.4.2"
 pandas = "^2.2.2"
 setuptools = "^69.5.1"
+ipython = "^8.24.0"
+pyarrow = "^16.1.0"
+fastparquet = "^2024.5.0"
 
 [tool.poetry.dev-dependencies]
 
