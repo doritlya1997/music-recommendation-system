@@ -55,10 +55,11 @@ function addSong() {
     }
 }
 
-function generateSongHTML({ song, artist, album, year, link }, actions) {
+function generateSongHTML({ track_id, song, artist, album, year, link }, actions) {
     return `
         <div class="list-group-item">
             <div class="item-details">
+                <span class="song-id hidden">${track_id}</span>
                 <span class="song-title">${song}</span>
                 <span class="artist-name">${artist}</span>
                 <span class="album-name">${album}</span>
@@ -75,6 +76,12 @@ function generateSongHTML({ song, artist, album, year, link }, actions) {
 function appendSongToLiked(songDetails) {
     var likedSongsList = document.getElementById('likedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'liked')"><i class="fa fa-trash"></i> Remove</button>`;
+    likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+}
+
+function appendSongToDisiked(songDetails) {
+    var likedSongsList = document.getElementById('dislikedSongsList');
+    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'disliked')"><i class="fa fa-trash"></i> Remove</button>`;
     likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
@@ -101,6 +108,7 @@ function extractTrackId(link) {
 function likeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
+        track_id: songItem.querySelector('.song-id').textContent,
         song: songItem.querySelector('.song-title').textContent,
         artist: songItem.querySelector('.artist-name').textContent,
         album: songItem.querySelector('.album-name').textContent,
@@ -111,12 +119,11 @@ function likeSong(button) {
     appendSongToLiked(songDetails);
     songItem.remove();
 
-    // Extract track ID from the link
-    var trackId = extractTrackId(songDetails.link);
-    if (!trackId) {
-        console.error('Invalid Spotify link:', songDetails.link);
-        return;
-    }
+//    var trackId = extractTrackId(songDetails.link);
+//    if (!trackId) {
+//        console.error('Invalid Spotify link:', songDetails.link);
+//        return;
+//    }
 
     // API call to like the song
     fetch('/like', {
@@ -125,8 +132,8 @@ function likeSong(button) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            username: document.getElementById('username').textContent, // Assuming username is displayed here
-            track_id: trackId
+            user_id: user_id,
+            track_id: songDetails.track_id
         })
     })
     .then(response => response.json())
@@ -141,6 +148,7 @@ function likeSong(button) {
 function dislikeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
+        track_id: songItem.querySelector('.song-id').textContent,
         song: songItem.querySelector('.song-title').textContent,
         artist: songItem.querySelector('.artist-name').textContent,
         album: songItem.querySelector('.album-name').textContent,
@@ -150,13 +158,6 @@ function dislikeSong(button) {
     appendSongToDisliked(songDetails);
     songItem.remove();
 
-    // Extract track ID from the link
-    var trackId = extractTrackId(songDetails.link);
-    if (!trackId) {
-        console.error('Invalid Spotify link:', songDetails.link);
-        return;
-    }
-
     // API call to dislike the song
     fetch('/dislike', {
         method: 'POST',
@@ -164,8 +165,8 @@ function dislikeSong(button) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            username: document.getElementById('username').textContent, // Assuming username is displayed here
-            track_id: trackId
+            user_id: user_id,
+            track_id: songDetails.track_id
         })
     })
     .then(response => response.json())
@@ -190,9 +191,8 @@ function removeSongFromList(button, listType) {
       .catch(error => console.error('Error:', error));
 }
 
-function refreshLikedSongs() {
-    // Example API call to get liked songs
-    fetch('/api/getLikedSongs')
+function refreshLikedSongs(user_id) {
+    fetch("/like/" + user_id)
     .then(response => response.json())
     .then(data => {
         var likedSongsList = document.getElementById('likedSongsList');
@@ -202,10 +202,30 @@ function refreshLikedSongs() {
     .catch(error => console.error('Error:', error));
 }
 
+function refreshDislikedSongs(user_id) {
+    fetch("/dislike/" + user_id)
+    .then(response => response.json())
+    .then(data => {
+        var dislikedSongsList = document.getElementById('dislikedSongsList');
+        dislikedSongsList.innerHTML = ''; // Clear the list
+        data.forEach(song => appendSongToDisliked(song));
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function refreshRecommendedSongs(user_id) {
+
+
+}
 // Example: Load recommended songs
 var recommendedSongs = [
-    { song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
-    { song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
-    { song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
+    { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
+    { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
+    { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
 ];
 recommendedSongs.forEach(song => appendSongToRecommendations(song));
+
+user_id = 2
+refreshLikedSongs(user_id)
+refreshDislikedSongs(user_id)
+refreshRecommendedSongs(user_id)

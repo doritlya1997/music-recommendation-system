@@ -15,7 +15,7 @@ class Track(BaseModel):
 
 
 class UserTrackRequest(BaseModel):
-    username: str
+    user_id: int
     track_id: str
 
 

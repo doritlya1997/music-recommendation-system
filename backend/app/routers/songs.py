@@ -25,14 +25,14 @@ def login(user: User):
     return {"username": user['username']}
 
 
-@router.get("/like")
-def get_likes(username: str):
-    return crud.get_likes(username)
+@router.get("/like/{user_id}")
+def get_likes(user_id: int):
+    return crud.get_likes(user_id)
 
 
-@router.get("/dislike")
-def get_dislikes(username: str):
-    return crud.get_dislikes(username)
+@router.get("/dislike/{user_id}")
+def get_dislikes(user_id: int):
+    return crud.get_dislikes(user_id)
 
 
 @router.post("/like/csv")
@@ -44,14 +44,14 @@ def upload_csv(request: CSVUploadRequest):
 
 @router.post("/like")
 def add_like(request: UserTrackRequest):
-    if not crud.add_like(request.username, request.track_id):
+    if not crud.add_like(request.user_id, request.track_id):
         raise HTTPException(status_code=400, detail="Track not found")
     return {"status": "200"}
 
 
 @router.post("/dislike")
 def add_dislike(request: UserTrackRequest):
-    if not crud.add_dislike(request.username, request.track_id):
+    if not crud.add_dislike(request.user_id, request.track_id):
         raise HTTPException(status_code=400, detail="Track not found")
     return {"status": "200"}
 
