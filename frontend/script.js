@@ -79,10 +79,10 @@ function appendSongToLiked(songDetails) {
     likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
-function appendSongToDisiked(songDetails) {
-    var likedSongsList = document.getElementById('dislikedSongsList');
+function appendSongToDisliked(songDetails) {
+    var dislikedSongsList = document.getElementById('dislikedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'disliked')"><i class="fa fa-trash"></i> Remove</button>`;
-    likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+    dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
 function appendSongToRecommendations(songDetails) {
@@ -92,12 +92,6 @@ function appendSongToRecommendations(songDetails) {
         <button class="btn btn-danger" onclick="dislikeSong(this)"><i class="fa fa-thumbs-down"></i> Dislike</button>
     `;
     recommendedSongsList.innerHTML += generateSongHTML(songDetails, actions);
-}
-
-function appendSongToDisliked(songDetails) {
-    var dislikedSongsList = document.getElementById('dislikedSongsList');
-    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'disliked')"><i class="fa fa-trash"></i> Remove</button>`;
-    dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
 function extractTrackId(link) {
