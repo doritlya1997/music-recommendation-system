@@ -23,13 +23,13 @@
         <div class="list-container">
             <div id="likedSongsContainer" class="list-group-container">
                 <h2>Favorites</h2>
-                <button class="btn btn-default" onclick="refreshLikedSongs()">Refresh</button>
                 <div id="likedSongsList" class="list-group">
                     <!-- Dynamically added liked songs will appear here -->
                 </div>
             </div>
             <div id="recommendedSongsContainer" class="list-group-container emphasized">
                 <h2>Suggestions for You</h2>
+                <button id="refreshButton" class="btn btn-refresh" onclick="refreshLikedSongs()">Refresh</button>
                 <div id="recommendedSongsList" class="list-group">
                     <!-- Dynamically added recommended songs will appear here -->
                 </div>

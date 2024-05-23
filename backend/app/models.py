@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 
 class User(BaseModel):
@@ -21,4 +22,4 @@ class UserTrackRequest(BaseModel):
 
 class CSVUploadRequest(BaseModel):
     username: str
-    track_ids: list[str]
+    track_ids: List[str]
