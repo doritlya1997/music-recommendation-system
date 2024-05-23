@@ -90,32 +90,26 @@ def add_dislike(user_id: int, track_id: str):
             return True
 
 
-def remove_like(username: str, track_id: str):
+def remove_like(user_id: int, track_id: str):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE username = %s;", (username,))
+            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
             if not user:
                 return False
-            user_id = user['id']
-            cur.execute("""
-                DELETE FROM likes WHERE user_id = %s AND track_id = %s;
-            """, (user_id, track_id))
+            cur.execute("""DELETE FROM likes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
             return True
 
 
-def remove_dislike(username: str, track_id: str):
+def remove_dislike(user_id: int, track_id: str):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE username = %s;", (username,))
+            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
             if not user:
                 return False
-            user_id = user['id']
-            cur.execute("""
-                DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;
-            """, (user_id, track_id))
+            cur.execute("""DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
             return True
 

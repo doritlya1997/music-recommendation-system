@@ -58,14 +58,15 @@ def add_dislike(request: UserTrackRequest):
 
 @router.delete("/like")
 def remove_like(request: UserTrackRequest):
-    if not crud.remove_like(request.username, request.track_id):
+    print(request)
+    if not crud.remove_like(request.user_id, request.track_id):
         raise HTTPException(status_code=400, detail="Track not found")
     return {"status": "200"}
 
 
 @router.delete("/dislike")
 def remove_dislike(request: UserTrackRequest):
-    if not crud.remove_dislike(request.username, request.track_id):
+    if not crud.remove_dislike(request.user_id, request.track_id):
         raise HTTPException(status_code=400, detail="Track not found")
     return {"status": "200"}
 

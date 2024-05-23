@@ -75,13 +75,13 @@ function generateSongHTML({ track_id, song, artist, album, year, link }, actions
 
 function appendSongToLiked(songDetails) {
     var likedSongsList = document.getElementById('likedSongsList');
-    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'liked')"><i class="fa fa-trash"></i> Remove</button>`;
+    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
     likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
 function appendSongToDisliked(songDetails) {
     var dislikedSongsList = document.getElementById('dislikedSongsList');
-    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'disliked')"><i class="fa fa-trash"></i> Remove</button>`;
+    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'dislike')"><i class="fa fa-trash"></i> Remove</button>`;
     dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
 }
 
@@ -176,13 +176,19 @@ function removeSongFromList(button, listType) {
     var songItem = button.parentNode.parentNode;
     songItem.parentNode.removeChild(songItem);
     // Example API call to remove the song
-    fetch('/api/removeSong', {
-        method: 'POST',
+    fetch("/" + listType, {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ song: songItem.querySelector('.song-title').textContent, list: listType })
-    }).then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
+        body: JSON.stringify({
+                    user_id: user_id,
+                    track_id: songItem.querySelector('.song-id').textContent
+                })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Song removed from list');
+     })
+     .catch(error => console.error('Error:', error));
 }
 
 function refreshLikedSongs(user_id) {
