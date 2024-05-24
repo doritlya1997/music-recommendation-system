@@ -1,0 +1,241 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff6f61, #ffba00);
+    margin: 0;
+    padding: 0;
+    color: white;
+    overflow-x: hidden;
+}
+
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.intro-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.intro-text {
+    color: #333;
+}
+
+.intro-text h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #ff6f61;
+}
+
+.intro-text p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.intro-image img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.auth-container {
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    color: #333;
+}
+
+.custom-tabs .nav-link {
+    border: 1px solid #ff6f61;
+    border-bottom: none;
+    color: #ff6f61;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 20px;
+    margin-right: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.custom-tabs .nav-link.active {
+    background-color: #ff6f61;
+    color: white;
+    border: 1px solid #ff6f61;
+    border-bottom: none;
+}
+
+.custom-tabs .nav-link:hover {
+    background-color: #ff6f61;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #ff6f61;  /* Add underline across bottom of tabs */
+}
+
+.component-area {
+    margin-top: -10px;
+}
+
+.form-container h3 {
+    margin-bottom: 20px;
+    color: #ff6f61;
+}
+
+.btn-custom {
+    margin: 10px 0;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn-primary {
+    background-color: #ff6f61;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+}
+
+/* Ensure inputs are in the same row */
+.form-inline {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    margin-top: 20px;  /* Add margin to avoid overlap with tabs */
+}
+
+/* Adjust the size of the eye icon */
+.input-group-append .btn i {
+    font-size: 1rem; /* Standard icon size */
+    padding: 0.25rem;
+}
+
+/* Remove any padding/margin causing misalignment */
+.form-inline .form-control,
+.form-inline .input-group {
+    margin-right: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+
+.input-group-append .btn {
+    padding: 0;
+    margin-left: -1px;
+}
+
+.input-group .form-control {
+    border-right: 0;
+}
+
+.input-group-append .btn {
+    padding: 0;
+    margin-left: -1px;
+}
+
+/* Add padding left to input fields */
+.form-control::placeholder {
+    padding-left: 10px;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #ff6f61;  /* Add underline across bottom of tabs */
+}
+
+.nav-tabs .nav-link {
+    color: #ff6f61;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #ff6f61;
+    color: white;
+}
+
+/* Adjust the color of the active registration tab */
+.custom-tabs .nav-link#register-tab.active {
+    background-color: #6c757d; /* Change this to match the register button color */
+    color: white;
+    border: 1px solid #6c757d;
+    border-bottom: none;
+}
+
+/* Adjust the color of the registration tab on hover */
+.custom-tabs .nav-link#register-tab:hover {
+    background-color: #6c757d; /* Change this to match the register button color */
+    color: white;
+    transition: background-color 0.3s;
+}
+
+/* Ensure inputs are in the same row */
+.form-inline {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    margin-top: 20px;  /* Add margin to avoid overlap with tabs */
+}
+
+/* Adjust the size of the eye icon */
+.input-group-append .btn i {
+    font-size: 1rem; /* Standard icon size */
+    padding: 0.25rem;
+}
+
+/* Remove any padding/margin causing misalignment */
+.form-inline .form-control,
+.form-inline .input-group {
+    margin-right: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+
+.input-group-append .btn {
+    padding: 0;
+    margin-left: -1px;
+}
+
+.input-group .form-control {
+    border-right: 0;
+}
+
+.input-group-append .btn {
+    padding: 0;
+    margin-left: -1px;
+}
+
+/* Add padding left to input fields */
+.form-control::placeholder {
+    padding-left: 10px;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #ff6f61;  /* Add underline across bottom of tabs */
+}
+
+.nav-tabs .nav-link {
+    color: #ff6f61;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #ff6f61;
+    color: white;
+}

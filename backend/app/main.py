@@ -14,4 +14,4 @@ app.mount("/static", StaticFiles(directory="./frontend"), name="static")
 
 @app.get("/")
 async def read_root():
-    return FileResponse("./frontend/index.html")
+    return FileResponse("./frontend/login/index.html")
