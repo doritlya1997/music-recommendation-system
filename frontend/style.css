@@ -339,3 +339,8 @@ input:focus {
 .listen-link:hover {
     text-decoration: underline !important;
 }
+
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+}

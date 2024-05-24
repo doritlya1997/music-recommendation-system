@@ -11,7 +11,10 @@
 <body>
     <div class="container">
         <div class="page-title text-center">
-            <h1>Hello <span id="username">user1</span></h1>
+            <h1 id="HelloUser" class="hidden">Hello <span id="username"></span></h1>
+        </div>
+        <div id="LogoutButton" class="text-right hidden">
+            <button class="btn btn-add btn-custom btn-primary text-right" onclick="logout()">Logout</button>
         </div>
         <div class="input-component text-center">
             <input type="text" class="form-control input-sm" id="songInput" placeholder="Add your favorite (by link / CSV upload)">
@@ -43,6 +46,7 @@
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/static/script.js"></script>
 </body>
 </html>
