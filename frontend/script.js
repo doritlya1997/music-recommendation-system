@@ -1,3 +1,77 @@
+CACHE_USER_ID_KEY = 'user_id'
+CACHE_USER_NAME_KEY = 'user_name'
+
+function getUserId() {
+    user_id = localStorage.getItem(CACHE_USER_ID_KEY)
+    return user_id ? Number(user_id) : null
+}
+function getUserName() {
+    return localStorage.getItem(CACHE_USER_NAME_KEY)
+}
+
+
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var username = document.getElementById('loginUsername').value;
+    var password = document.getElementById('loginPassword').value;
+    debugger
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#loginModal').modal('hide');
+            $('#LoginRegisterButtons').addClass('hidden');
+            $('#LogoutButton').removeClass('hidden');
+
+            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
+            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
+
+            refreshScreen()
+        } else {
+            alert('Login failed: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+document.getElementById('registerForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var username = document.getElementById('registerUsername').value;
+    var password = document.getElementById('registerPassword').value;
+    debugger
+    fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#registerModal').modal('hide');
+            $('#LoginRegisterButtons').addClass('hidden');
+            $('#LogoutButton').removeClass('hidden');
+
+            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
+            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
+
+            refreshScreen()
+        } else {
+            alert('Registration failed: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+function logout() {
+    localStorage.setItem(CACHE_USER_ID_KEY, null);
+    alert('You are logged out');
+    refreshScreen();
+}
+
 document.getElementById('csvFileInput').addEventListener('change', function(event) {
     var file = event.target.files[0];
     var reader = new FileReader();
@@ -214,18 +288,42 @@ function refreshDislikedSongs(user_id) {
 }
 
 function refreshRecommendedSongs(user_id) {
-
-
+    // Example: Load recommended songs
+    var recommendedSongs = [
+        { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
+        { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
+        { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
+    ];
+    recommendedSongs.forEach(song => appendSongToRecommendations(song));
 }
-// Example: Load recommended songs
-var recommendedSongs = [
-    { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
-    { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
-    { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
-];
-recommendedSongs.forEach(song => appendSongToRecommendations(song));
 
-user_id = 2
-refreshLikedSongs(user_id)
-refreshDislikedSongs(user_id)
-refreshRecommendedSongs(user_id)
+function refreshScreen() {
+    user_id = getUserId()
+    user_name = getUserName
+    if (user_id) {
+//        window.location.replace('hello.html');
+
+        $('#username').text(user_name);
+        $('#HelloUser').removeClass('hidden');
+        $('#Welcome').addClass('hidden');
+
+
+        $('#LogoutButton').removeClass('hidden');
+        $('#AppContainer').removeClass('hidden');
+        $('#LoginRegisterButtons').addClass('hidden');
+
+        refreshLikedSongs(user_id)
+        refreshDislikedSongs(user_id)
+        refreshRecommendedSongs(user_id)
+    }
+    else {
+        $('#LoginRegisterButtons').removeClass('hidden');
+        $('#Welcome').removeClass('hidden');
+    }
+}
+
+
+///////
+user_id = getUserId()
+user_name = getUserName
+refreshScreen(user_id)

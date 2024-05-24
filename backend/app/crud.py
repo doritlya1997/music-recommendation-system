@@ -5,18 +5,18 @@ def create_user(username: str, hashed_password: str):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO users (username, hashed_password) VALUES (%s, %s) RETURNING id, username;
+                INSERT INTO users (username, hashed_password) VALUES (%s, %s) RETURNING id as user_id, username as user_name;
             """, (username, hashed_password))
             user = cur.fetchone()
             conn.commit()
             return user
 
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, username, hashed_password FROM users WHERE username = %s;
+                SELECT id as user_id, username as user_name, hashed_password FROM users WHERE username = %s;
             """, (username,))
             user = cur.fetchone()
             return user

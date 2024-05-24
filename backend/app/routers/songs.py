@@ -8,21 +8,27 @@ from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 router = APIRouter()
 
 
-@router.post("/signup")
-def signup(user: User):
+@router.post("/register")
+def register(user: User):
     hashed_password = hash_password(user.password)
     user = crud.create_user(user.username, hashed_password)
     if not user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    return user
+    return {'success': True,
+            'user_id': user['user_id'],
+            'user_name': user['user_name']
+            }
 
 
 @router.post("/login")
 def login(user: User):
-    user = crud.authenticate_user(user.username, user.password)
-    if not user or not verify_password(user.password, user['hashed_password']):
+    dbuser = crud.authenticate_user(user.username)
+    if not user or not verify_password(user.password, dbuser['hashed_password']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    return {"username": user['username']}
+    return {'success': True,
+            'user_id': dbuser['user_id'],
+            'user_name': dbuser['user_name']
+            }
 
 
 @router.get("/like/{user_id}")
