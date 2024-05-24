@@ -10,61 +10,61 @@ function getUserName() {
 }
 
 
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    var username = document.getElementById('loginUsername').value;
-    var password = document.getElementById('loginPassword').value;
-    debugger
-    fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username, password: password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            $('#loginModal').modal('hide');
-            $('#LoginRegisterButtons').addClass('hidden');
-            $('#LogoutButton').removeClass('hidden');
-
-            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
-            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
-
-            refreshScreen()
-        } else {
-            alert('Login failed: ' + data.message);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
-
-document.getElementById('registerForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    var username = document.getElementById('registerUsername').value;
-    var password = document.getElementById('registerPassword').value;
-    debugger
-    fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username, password: password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            $('#registerModal').modal('hide');
-            $('#LoginRegisterButtons').addClass('hidden');
-            $('#LogoutButton').removeClass('hidden');
-
-            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
-            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
-
-            refreshScreen()
-        } else {
-            alert('Registration failed: ' + data.message);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
+//document.getElementById('loginForm').addEventListener('submit', function(event) {
+//    event.preventDefault();
+//    var username = document.getElementById('loginUsername').value;
+//    var password = document.getElementById('loginPassword').value;
+//    debugger
+//    fetch('/login', {
+//        method: 'POST',
+//        headers: { 'Content-Type': 'application/json' },
+//        body: JSON.stringify({ username: username, password: password })
+//    })
+//    .then(response => response.json())
+//    .then(data => {
+//        if (data.success) {
+//            $('#loginModal').modal('hide');
+//            $('#LoginRegisterButtons').addClass('hidden');
+//            $('#LogoutButton').removeClass('hidden');
+//
+//            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
+//            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
+//
+//            refreshScreen()
+//        } else {
+//            alert('Login failed: ' + data.message);
+//        }
+//    })
+//    .catch(error => console.error('Error:', error));
+//});
+//
+//document.getElementById('registerForm').addEventListener('submit', function(event) {
+//    event.preventDefault();
+//    var username = document.getElementById('registerUsername').value;
+//    var password = document.getElementById('registerPassword').value;
+//    debugger
+//    fetch('/register', {
+//        method: 'POST',
+//        headers: { 'Content-Type': 'application/json' },
+//        body: JSON.stringify({ username: username, password: password })
+//    })
+//    .then(response => response.json())
+//    .then(data => {
+//        if (data.success) {
+//            $('#registerModal').modal('hide');
+//            $('#LoginRegisterButtons').addClass('hidden');
+//            $('#LogoutButton').removeClass('hidden');
+//
+//            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
+//            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
+//
+//            refreshScreen()
+//        } else {
+//            alert('Registration failed: ' + data.message);
+//        }
+//    })
+//    .catch(error => console.error('Error:', error));
+//});
 
 function logout() {
     localStorage.setItem(CACHE_USER_ID_KEY, null);
