@@ -6,12 +6,13 @@
     <title>Spotify Song Recommender</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/recommendation/style.css">
 </head>
 <body>
     <div class="container">
         <div class="page-title text-center">
             <h1>Hello <span id="username">user1</span></h1>
+            <button id="logoutBtn" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">Logout</button>
         </div>
         <div class="input-component text-center">
             <input type="text" class="form-control input-sm" id="songInput" placeholder="Add your favorite (by link / CSV upload)">
@@ -43,6 +44,18 @@
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/static/script.js"></script>
+    <script src="/static/recommendation/script.js"></script>
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('userId');
+            window.location.href = '/';
+        });
+
+        // Check if user is logged in
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = '/';
+        }
+    </script>
 </body>
 </html>
