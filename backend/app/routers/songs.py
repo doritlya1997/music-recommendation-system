@@ -1,21 +1,12 @@
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Request, APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, APIRouter
 from .. import crud, algo
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
 router = APIRouter()
-app = FastAPI()
 
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"message": exc.detail},
-    )
 
 @router.post("/register")
 def register(user: User):
