@@ -11,18 +11,20 @@ router = APIRouter()
 @router.post("/register")
 def register(user: User):
     hashed_password = hash_password(user.password)
-    user = crud.create_user(user.username, hashed_password)
-    if not user:
+    dbuser = crud.create_user(user.username, hashed_password)
+    if not dbuser:
         raise HTTPException(status_code=400, detail="Username already registered")
-    return user
+    return {'user_id': dbuser['user_id'],
+            'user_name': dbuser['user_name']}
 
 
 @router.post("/login")
 def login(user: User):
     dbuser = crud.authenticate_user(user.username)
-    if not user or not verify_password(user.password, dbuser['hashed_password']):
+    if not dbuser or not verify_password(user.password, dbuser['hashed_password']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    return {"username": user['username']}
+    return {'user_id': dbuser['user_id'],
+            'user_name': dbuser['user_name']}
 
 
 @router.get("/like/{user_id}")

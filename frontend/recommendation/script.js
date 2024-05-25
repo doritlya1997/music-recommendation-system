@@ -2,8 +2,8 @@ CACHE_USER_ID_KEY = 'user_id'
 CACHE_USER_NAME_KEY = 'user_name'
 
 function getUserId() {
-    user_id = localStorage.getItem(CACHE_USER_ID_KEY)
-    return user_id ? Number(user_id) : null
+    id = localStorage.getItem(CACHE_USER_ID_KEY)
+    return id ? Number(id) : null
 }
 function getUserName() {
     return localStorage.getItem(CACHE_USER_NAME_KEY)
@@ -263,6 +263,8 @@ function removeSongFromList(button, listType) {
 }
 
 function refreshLikedSongs(user_id) {
+    user_id = getUserId()
+
     fetch("/like/" + user_id)
     .then(response => response.json())
     .then(data => {
@@ -274,6 +276,8 @@ function refreshLikedSongs(user_id) {
 }
 
 function refreshDislikedSongs(user_id) {
+    user_id = getUserId()
+
     fetch("/dislike/" + user_id)
     .then(response => response.json())
     .then(data => {
@@ -285,16 +289,16 @@ function refreshDislikedSongs(user_id) {
 }
 
 function refreshRecommendedSongs(user_id) {
-//    var recommendedSongs = [
-//        { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
-//        { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
-//        { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
-//    ];
+    user_id = getUserId()
+
+    var recommendedSongsList = document.getElementById('recommendedSongsList');
+    recommendedSongsList.innerHTML = ''; // Clear the list
+    $("#recommendationsLoader").removeClass("hidden");
+
     fetch("/recommendation/" + user_id)
     .then(response => response.json())
     .then(data => {
-        var recommendedSongsList = document.getElementById('recommendedSongsList');
-        recommendedSongsList.innerHTML = ''; // Clear the list
+        $("#recommendationsLoader").addClass("hidden");
         data.forEach(song => appendSongToRecommendations(song));
     })
     .catch(error => console.error('Error:', error));
@@ -302,31 +306,12 @@ function refreshRecommendedSongs(user_id) {
 
 function refreshScreen() {
     user_id = getUserId()
-    user_name = getUserName
+    user_name = getUserName()
     if (user_id) {
-//        window.location.replace('hello.html');
-
-        $('#username').text(user_name);
-        $('#HelloUser').removeClass('hidden');
-        $('#Welcome').addClass('hidden');
-
-
-        $('#LogoutButton').removeClass('hidden');
-        $('#AppContainer').removeClass('hidden');
-        $('#LoginRegisterButtons').addClass('hidden');
-
-        refreshLikedSongs(user_id)
-        refreshDislikedSongs(user_id)
-        refreshRecommendedSongs(user_id)
-    }
-    else {
-        $('#LoginRegisterButtons').removeClass('hidden');
-        $('#Welcome').removeClass('hidden');
+        refreshLikedSongs()
+        refreshDislikedSongs()
+        refreshRecommendedSongs()
     }
 }
 
-
-///////
-user_id = getUserId()
-user_name = getUserName
-refreshScreen(user_id)
+refreshScreen()

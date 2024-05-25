@@ -366,3 +366,18 @@ input:focus {
     background-color: #004080; /* Even darker blue on click */
     transform: scale(0.95); /* Slightly shrink on click */
 }
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #ffa500; /* Orange */
+    margin: 0 auto;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
