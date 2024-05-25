@@ -3,6 +3,7 @@
 ### Heroku commands for Deployment
 ```
 heroku login
+heroku git:remote -a music-application
 git push heroku main
 heroku open -a music-application
 ```
@@ -16,6 +17,19 @@ brew tap heroku/brew && brew install heroku
 
 heroku login
 heroku create music-recommendation-system
+````
+
+### When problem encountered with poetry
+````
+python3.12 -m venv myenv
+source myenv/bin/activate
+poetry env use python3.12
+source myenv/bin/activate
+pip install setuptools wheel
+python -c "import distutils"
+rm poetry.lock
+poetry lock
+poetry install
 ````
 
 ### Data Preparation and loading into PostgreSQL DB
