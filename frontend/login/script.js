@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('userId', data.userId);
-            window.location.href = '/recommendations.html';
+            window.location.href = '../recommendation/index.html';
         } else {
             const errorData = await response.json();
             loginError.textContent = errorData.message;

@@ -32,6 +32,10 @@ poetry lock
 poetry install
 ````
 
+### Production logs monitoring
+````
+heroku logs --tail --app  music-application
+````
 ### Data Preparation and loading into PostgreSQL DB
 To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need to:
 
