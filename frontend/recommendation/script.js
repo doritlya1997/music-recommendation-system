@@ -11,7 +11,6 @@ function getUserName() {
 
 function logout() {
     localStorage.setItem(CACHE_USER_ID_KEY, null);
-    alert('You are logged out');
     refreshScreen();
 }
 
