@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (response.ok) {
+            alert('login successful!');
             const data = await response.json();
             localStorage.setItem('userId', data.userId);
             window.location.href = '/static/recommendation/index.html';
@@ -63,9 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({ username, password })
         });
-
         if (response.ok) {
             alert('Registration successful!');
+            const data = await response.json();
+            localStorage.setItem('userId', data.userId);
+            window.location.href = '/static/recommendation/index.html';
         } else {
             const errorData = await response.json();
             registerError.textContent = errorData.message;
