@@ -5,7 +5,9 @@ def create_user(username: str, hashed_password: str):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO users (username, hashed_password) VALUES (%s, %s) RETURNING id as user_id, username as user_name;
+                INSERT INTO users (username, hashed_password)
+                ON CONFLICT (username) DO NOTHING
+                VALUES (%s, %s) RETURNING id as user_id, username as user_name;
             """, (username, hashed_password))
             user = cur.fetchone()
             conn.commit()
