@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                loginError.textContent = `Error ${response.status}: ${errorData.message || response.statusText}`;
+                loginError.textContent = `Error ${errorData}`;
                 return;
             }
 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                registerError.textContent = `Error ${response.status}: ${errorData.message || response.statusText}`;
+                registerError.textContent = `Error ${errorData}`;
                 return;
             }
 
