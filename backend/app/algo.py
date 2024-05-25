@@ -158,6 +158,8 @@ def get_recommendations_by_user_listening_history(user_id: int):
     tracks_other_cols_df = tracks_df[other_cols]
     display(tracks_df)
 
+
+    # TODO: if empty, no recommendation!!!
     user_likes_playlist = get_tracks_df(user_id, type="like")
     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
 

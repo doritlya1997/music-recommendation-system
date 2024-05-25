@@ -35,22 +35,53 @@ function processCSVData(csvData) {
     }
     var headers = dataLines[0].split(',');
     var rows = dataLines.slice(1);
-    
+
+    track_id_list = []
+    error_occurred = null
     rows.forEach(row => {
-        var columns = row.split(',');
-        if (columns.length === headers.length) {
-            console.log(columns);  // Replace this with actual processing or display logic
-        } else {
-            console.error('Row does not match header length:', row);
+        if (!error_occurred) {
+            var columns = row.split(',');
+            if (columns.length === headers.length) {
+                track_id_list.push(columns[0]);
+            } else {
+                alert('CSV Row does not match header length:', row);
+                error_occurred = true
+            }
         }
     });
+
+     if (!error_occurred) {
+        fetch('/like/csv', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: getUserId(),
+                track_ids: track_id_list
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.affected_rows > 0)
+                alert(data.affected_rows + " " + data.message)
+            else
+                alert(data.message)
+            console.log('Songs liked:', data);
+            refreshLikedSongs();
+        })
+        .catch(error => console.error('Error:', error));
+
+        document.getElementById('songInput').value = ''; // Clear input field
+
+     }
 }
 
 function addSong() {
     var song_input = document.getElementById('songInput').value.trim();
     track_id = extractTrackId(song_input)
 
-    if (songInput) {
+    if (track_id) {
         fetch('/like', {
             method: 'POST',
             headers: {
@@ -68,9 +99,9 @@ function addSong() {
         })
         .catch(error => console.error('Error:', error));
 
-        document.getElementById('songInput').value = ''; // Clear input field
+        document.getElementById('songInput').value = '';
     } else {
-        alert('Please enter a song link or upload a CSV file.');
+        alert('Please enter a Spotify song link or upload a CSV file.');
     }
 }
 
@@ -90,7 +121,7 @@ function generateSongHTML({ track_id, track_name, artist_name, year, link }, act
         </div>
     `;
 }
-
+// TODO: append at the beginning
 function appendSongToLiked(songDetails) {
     var likedSongsList = document.getElementById('likedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;

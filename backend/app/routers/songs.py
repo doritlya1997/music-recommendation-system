@@ -36,25 +36,29 @@ def get_likes(user_id: int):
 def get_dislikes(user_id: int):
     return crud.get_dislikes(user_id)
 
-# TODO
+
 @router.post("/like/csv")
 def upload_csv(request: CSVUploadRequest):
-    if not crud.upload_csv(request.username, request.track_ids):
-        raise HTTPException(status_code=400, detail="User not found")
-    return {"status": "200"}
+    affected_rows = crud.upload_csv(request.user_id, request.track_ids)
+    if affected_rows == 0:
+        return {"status": "200", "message": "All liked tracks already exist", "affected_rows": affected_rows}
+    elif affected_rows > 0:
+        return {"status": "200", "message": "Likes were inserted successfully", "affected_rows": affected_rows}
+    elif affected_rows == False:
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 @router.post("/like")
 def add_like(request: UserTrackRequest):
     if not crud.add_like(request.user_id, request.track_id):
-        raise HTTPException(status_code=400, detail="Track not found")
+        raise HTTPException(status_code=400, detail="User not found")
     return {"status": "200"}
 
 
 @router.post("/dislike")
 def add_dislike(request: UserTrackRequest):
     if not crud.add_dislike(request.user_id, request.track_id):
-        raise HTTPException(status_code=400, detail="Track not found")
+        raise HTTPException(status_code=400, detail="User not found")
     return {"status": "200"}
 
 
