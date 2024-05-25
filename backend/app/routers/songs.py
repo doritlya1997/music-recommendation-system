@@ -13,7 +13,7 @@ def register(user: User):
     hashed_password = hash_password(user.password)
     dbuser = crud.create_user(user.username, hashed_password)
     if not dbuser:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Username already exists")
     return {'user_id': dbuser['user_id'],
             'user_name': dbuser['user_name']}
 
