@@ -75,6 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is logged in
     const userId = localStorage.getItem('userId');
     if (userId) {
-        window.location.href = '/recommendations.html';
+        window.location.href = '/recommendation/index.html';
     }
 });
