@@ -63,9 +63,9 @@ function addSong() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data));
+            console.log('Song liked:', data);
             refreshLikedSongs();
-        }
+        })
         .catch(error => console.error('Error:', error));
 
         document.getElementById('songInput').value = ''; // Clear input field
@@ -144,7 +144,7 @@ function likeSong(button) {
     .then(response => response.json())
     .then(data => {
         console.log('Song liked:', data);
-        refreshLikedSongs()
+        refreshLikedSongs();
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -248,6 +248,7 @@ function refreshScreen() {
     user_id = getUserId()
     user_name = getUserName()
     if (user_id) {
+        $("#username").text(user_name)
         refreshLikedSongs()
         refreshDislikedSongs()
         refreshRecommendedSongs()
