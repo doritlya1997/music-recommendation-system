@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('userId', data.userId);
-            window.location.href = '/recommendation/index.html';
+            window.location.href = '/static/recommendation/index.html';
         } else {
             const errorData = await response.json();
             loginError.textContent = errorData.message;
@@ -75,6 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is logged in
     const userId = localStorage.getItem('userId');
     if (userId) {
-        window.location.href = '/recommendation/index.html';
+        window.location.href = '/static/recommendation/index.html';
     }
 });
