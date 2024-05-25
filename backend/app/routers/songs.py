@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, HTTPException
-from .. import crud
+from .. import crud, algo
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
@@ -40,7 +40,7 @@ def get_likes(user_id: int):
 def get_dislikes(user_id: int):
     return crud.get_dislikes(user_id)
 
-
+# TODO
 @router.post("/like/csv")
 def upload_csv(request: CSVUploadRequest):
     if not crud.upload_csv(request.username, request.track_ids):
@@ -77,6 +77,11 @@ def remove_dislike(request: UserTrackRequest):
     return {"status": "200"}
 
 
-@router.get("/recommendation", response_model=List[Track])
-def get_recommendations():
-    return crud.get_recommendations()
+@router.get("/recommendation/{user_id}", response_model=List[Track])
+def get_recommendations(user_id: int):
+    return algo.get_recommendations_by_user_listening_history(user_id)
+
+
+# TODO: recommendation by user listening history
+# TODO: recommendation by similar user - top tracks
+# TODO: recommendation by favorite artists - get data from spotify. update db and parquet files.

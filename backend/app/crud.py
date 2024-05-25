@@ -21,7 +21,7 @@ def authenticate_user(username: str):
             user = cur.fetchone()
             return user
 
-
+# TODO: reprocess the data and produce simple 'year' column
 def get_likes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -36,6 +36,19 @@ def get_likes(user_id: int):
             return tracks
 
 
+def get_liked_tracks(user_id: int):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT tracks.*, update_timestamp
+                FROM likes
+                JOIN tracks ON likes.track_id = tracks.track_id
+                WHERE likes.user_id = %s; 
+                """, (user_id,))
+            tracks = cur.fetchall()
+            return tracks
+
+
 def get_dislikes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -46,6 +59,19 @@ def get_dislikes(user_id: int):
                 JOIN tracks t ON d.track_id = t.track_id
                 WHERE u.id = %s;
             """, (user_id,))
+            tracks = cur.fetchall()
+            return tracks
+
+
+def get_disliked_tracks(user_id: int):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT tracks.*, update_timestamp
+                FROM dislikes
+                JOIN tracks ON dislikes.track_id = tracks.track_id
+                WHERE dislikes.user_id = %s; 
+                """, (user_id,))
             tracks = cur.fetchall()
             return tracks
 
