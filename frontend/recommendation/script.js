@@ -50,6 +50,7 @@ function processCSVData(csvData) {
         }
     });
 
+
      if (!error_occurred) {
         fetch('/like/csv', {
             method: 'POST',
