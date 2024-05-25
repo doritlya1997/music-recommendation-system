@@ -1,10 +1,10 @@
 /* General Styles */
 body {
-    background-color: #f4f4f9;
+    background: linear-gradient(135deg, #ff6f61, #ffba00);
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    color: #333;
+    color: white;
 }
 
 .container {
@@ -340,7 +340,29 @@ input:focus {
     text-decoration: underline !important;
 }
 
-.hidden {
-    opacity: 0;
-    visibility: hidden;
+/* Refresh Button */
+.btn-refresh {
+    display: block;
+    margin: 20px auto; /* Center horizontally and add more space */
+    padding: 14px 28px; /* More padding for a better feel */
+    font-size: 18px; /* Larger font size */
+    font-weight: bold; /* Bold text */
+    background-color: #007bff; /* Blue background */
+    color: #fff; /* White text */
+    border: none;
+    border-radius: 25px; /* Rounded corners */
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.btn-refresh:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.btn-refresh:active {
+    background-color: #004080; /* Even darker blue on click */
+    transform: scale(0.95); /* Slightly shrink on click */
 }

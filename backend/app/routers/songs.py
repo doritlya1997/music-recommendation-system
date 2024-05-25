@@ -14,10 +14,7 @@ def register(user: User):
     user = crud.create_user(user.username, hashed_password)
     if not user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    return {'success': True,
-            'user_id': user['user_id'],
-            'user_name': user['user_name']
-            }
+    return user
 
 
 @router.post("/login")
@@ -25,10 +22,7 @@ def login(user: User):
     dbuser = crud.authenticate_user(user.username)
     if not user or not verify_password(user.password, dbuser['hashed_password']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    return {'success': True,
-            'user_id': dbuser['user_id'],
-            'user_name': dbuser['user_name']
-            }
+    return {"username": user['username']}
 
 
 @router.get("/like/{user_id}")

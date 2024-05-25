@@ -20,6 +20,23 @@ heroku login
 heroku create music-recommendation-system
 ````
 
+### When problem encountered with poetry
+````
+python3.12 -m venv myenv
+source myenv/bin/activate
+poetry env use python3.12
+source myenv/bin/activate
+pip install setuptools wheel
+python -c "import distutils"
+rm poetry.lock
+poetry lock
+poetry install
+````
+
+### Production logs monitoring
+````
+heroku logs --tail --app  music-application
+````
 ### Data Preparation and loading into PostgreSQL DB
 To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need to:
 
