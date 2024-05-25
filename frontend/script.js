@@ -129,15 +129,14 @@ function addSong() {
     }
 }
 
-function generateSongHTML({ track_id, song, artist, album, year, link }, actions) {
+function generateSongHTML({ track_id, track_name, artist_name, year, link }, actions) {
     return `
         <div class="list-group-item">
             <div class="item-details">
-                <span class="song-id hidden">${track_id}</span>
-                <span class="song-title">${song}</span>
-                <span class="artist-name">${artist}</span>
-                <span class="album-name">${album}</span>
-                <span class="release-year">(${year})</span>
+                <span class="track-id hidden">${track_id}</span>
+                <span class="track-name">${track_name}</span>
+                <span class="artist-name">${artist_name}</span>
+                <span class="year">(${year})</span>
                 <a href="${link}" target="_blank" class="listen-link">Listen on Spotify</a>
             </div>
             <div class="button-group">
@@ -176,11 +175,10 @@ function extractTrackId(link) {
 function likeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
-        track_id: songItem.querySelector('.song-id').textContent,
-        song: songItem.querySelector('.song-title').textContent,
-        artist: songItem.querySelector('.artist-name').textContent,
-        album: songItem.querySelector('.album-name').textContent,
-        year: songItem.querySelector('.release-year').textContent.replace('(', '').replace(')', ''),
+        track_id: songItem.querySelector('.track-id').textContent,
+        track_name: songItem.querySelector('.track-name').textContent,
+        artist_name: songItem.querySelector('.artist-name').textContent,
+        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
         link: songItem.querySelector('.listen-link').href
     };
 
@@ -216,11 +214,10 @@ function likeSong(button) {
 function dislikeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
-        track_id: songItem.querySelector('.song-id').textContent,
-        song: songItem.querySelector('.song-title').textContent,
+        track_id: songItem.querySelector('.track-id').textContent,
+        song: songItem.querySelector('.track-name').textContent,
         artist: songItem.querySelector('.artist-name').textContent,
-        album: songItem.querySelector('.album-name').textContent,
-        year: songItem.querySelector('.release-year').textContent.replace('(', '').replace(')', ''),
+        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
         link: songItem.querySelector('.listen-link').href
     };
     appendSongToDisliked(songDetails);
@@ -255,7 +252,7 @@ function removeSongFromList(button, listType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
                     user_id: user_id,
-                    track_id: songItem.querySelector('.song-id').textContent
+                    track_id: songItem.querySelector('.track_id').textContent
                 })
     })
     .then(response => response.json())
@@ -288,13 +285,19 @@ function refreshDislikedSongs(user_id) {
 }
 
 function refreshRecommendedSongs(user_id) {
-    // Example: Load recommended songs
-    var recommendedSongs = [
-        { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
-        { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
-        { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
-    ];
-    recommendedSongs.forEach(song => appendSongToRecommendations(song));
+//    var recommendedSongs = [
+//        { track_id: '0XFvyWMTdl5DKSwbsWLm7n', song: 'Song 1', artist: 'Artist 1', album: 'Album 1', year: '2021', link: 'https://open.spotify.com/track/3d9DChrdc6BOeFsbrZ3Is0' },
+//        { track_id: '2WDXWl2o1lrH6Bcq7xVagu', song: 'Song 2', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/5qqabIl2vWzo9ApSC317sa' },
+//        { track_id: '6amT1NV7Ag2SPOdbqdnhFb', song: 'Song 3', artist: 'Artist 2', album: 'Album 2', year: '2020', link: 'https://open.spotify.com/track/48UPSzbZjgc449aqz8bxox' }
+//    ];
+    fetch("/recommendation/" + user_id)
+    .then(response => response.json())
+    .then(data => {
+        var recommendedSongsList = document.getElementById('recommendedSongsList');
+        recommendedSongsList.innerHTML = ''; // Clear the list
+        data.forEach(song => appendSongToRecommendations(song));
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function refreshScreen() {

@@ -188,7 +188,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
     top_similarities = top_similarities.head(10)
 
-    # TODO fix year
+    # TODO fix year, and select top_similarities['year']
     top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'similarity_score', 'year_2020_2024']]
     top_similarities = top_similarities.rename(columns={'year_2020_2024': 'year', 'similarity_score': 'relevance_percentage'})
 
