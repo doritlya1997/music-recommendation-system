@@ -33,23 +33,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
 
-        const response = await fetch('/login', {
+        fetch('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ username, password })
-        });
-
-        if (response.ok) {
-            alert('login successful!');
-            const data = await response.json();
-            localStorage.setItem('userId', data.userId);
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('user logged in:', data);
+            localStorage.setItem('user_id', data.user_id);
+            localStorage.setItem('user_name', data.user_name);
             window.location.href = '/static/recommendation/index.html';
-        } else {
-            const errorData = await response.json();
-            loginError.textContent = errorData.message;
-        }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            loginError.textContent = error.message;
+        });
     });
 
     registerForm.addEventListener('submit', async function(event) {
@@ -57,27 +58,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('registerUsername').value;
         const password = document.getElementById('registerPassword').value;
 
-        const response = await fetch('/signup', {
+        fetch('/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ username, password })
-        });
-        if (response.ok) {
-            alert('Registration successful!');
-            const data = await response.json();
-            localStorage.setItem('userId', data.userId);
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('user registered:', data);
+            localStorage.setItem('user_id', data.user_id);
+            localStorage.setItem('user_name', data.user_name);
             window.location.href = '/static/recommendation/index.html';
-        } else {
-            const errorData = await response.json();
-            registerError.textContent = errorData.message;
-        }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            registerError.textContent = error.message;
+        });
     });
 
     // Check if user is logged in
-    const userId = localStorage.getItem('userId');
-    if (userId) {
+    const user_id = localStorage.getItem('user_id');
+    if (user_id) {
         window.location.href = '/static/recommendation/index.html';
     }
 });

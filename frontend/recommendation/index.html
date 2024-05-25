@@ -26,11 +26,13 @@
                 <h2>Favorites</h2>
                 <div id="likedSongsList" class="list-group">
                     <!-- Dynamically added liked songs will appear here -->
+                    <div class="loader"></div>
                 </div>
             </div>
             <div id="recommendedSongsContainer" class="list-group-container emphasized">
                 <h2>Suggestions for You</h2>
-                <button id="refreshButton" class="btn btn-refresh" onclick="refreshLikedSongs()">Refresh</button>
+                <button id="refreshButton" class="btn btn-refresh" onclick="refreshRecommendedSongs()">Refresh</button>
+                <div id="recommendationsLoader" class="loader"></div>
                 <div id="recommendedSongsList" class="list-group">
                     <!-- Dynamically added recommended songs will appear here -->
                 </div>
@@ -39,6 +41,7 @@
                 <h2>Not for Me</h2>
                 <div id="dislikedSongsList" class="list-group">
                     <!-- Dynamically added disliked songs will appear here -->
+                    <div class="loader"></div>
                 </div>
             </div>
         </div>
@@ -47,13 +50,13 @@
     <script src="/static/recommendation/script.js"></script>
     <script>
         document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('userId');
+            localStorage.removeItem('user_id');
             window.location.href = '/';
         });
 
         // Check if user is logged in
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
+        const user_id = localStorage.getItem('user_id');
+        if (!user_id) {
             window.location.href = '/';
         }
     </script>
