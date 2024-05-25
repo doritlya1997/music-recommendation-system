@@ -15,6 +15,12 @@ function logout() {
     refreshScreen();
 }
 
+document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem(CACHE_USER_ID_KEY);
+            alert('You are logged out');
+            window.location.href = '/';
+        });
+
 document.getElementById('csvFileInput').addEventListener('change', function(event) {
     var file = event.target.files[0];
     var reader = new FileReader();
@@ -71,9 +77,9 @@ function addSong() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data));
+            console.log(data);
             refreshLikedSongs();
-        }
+        })
         .catch(error => console.error('Error:', error));
 
         document.getElementById('songInput').value = ''; // Clear input field
@@ -252,9 +258,16 @@ function refreshRecommendedSongs() {
     .catch(error => console.error('Error:', error));
 }
 
+// Check if user is logged in
+const user_id = localStorage.getItem('user_id');
+if (!user_id) {
+    window.location.href = '/';
+};
+
+
 function refreshScreen() {
-    user_id = getUserId()
-    user_name = getUserName()
+    var user_id = getUserId()
+    var user_name = getUserName()
     if (user_id) {
         refreshLikedSongs()
         refreshDislikedSongs()

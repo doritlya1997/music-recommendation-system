@@ -48,17 +48,5 @@
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="/static/recommendation/script.js"></script>
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('user_id');
-            window.location.href = '/';
-        });
-
-        // Check if user is logged in
-        const user_id = localStorage.getItem('user_id');
-        if (!user_id) {
-            window.location.href = '/';
-        }
-    </script>
 </body>
 </html>

@@ -1,11 +1,21 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse
 from .. import crud, algo
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
+app = FastAPI()
 router = APIRouter()
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.detail},
+    )
 
 
 @router.post("/register")
@@ -35,6 +45,7 @@ def get_likes(user_id: int):
 @router.get("/dislike/{user_id}")
 def get_dislikes(user_id: int):
     return crud.get_dislikes(user_id)
+
 
 # TODO
 @router.post("/like/csv")
@@ -76,7 +87,6 @@ def remove_dislike(request: UserTrackRequest):
 @router.get("/recommendation/{user_id}", response_model=List[Track])
 def get_recommendations(user_id: int):
     return algo.get_recommendations_by_user_listening_history(user_id)
-
 
 # TODO: recommendation by user listening history
 # TODO: recommendation by similar user - top tracks
