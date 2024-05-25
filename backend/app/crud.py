@@ -30,7 +30,8 @@ def get_likes(user_id: int):
                 FROM likes l
                 JOIN users u ON l.user_id = u.id
                 JOIN tracks t ON l.track_id = t.track_id
-                WHERE u.id = %s;
+                WHERE u.id = %s
+                ORDER BY l.update_timestamp DESC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks
@@ -57,7 +58,8 @@ def get_dislikes(user_id: int):
                 FROM dislikes d
                 JOIN users u ON d.user_id = u.id
                 JOIN tracks t ON d.track_id = t.track_id
-                WHERE u.id = %s;
+                WHERE u.id = %s
+                ORDER BY d.update_timestamp DESC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks

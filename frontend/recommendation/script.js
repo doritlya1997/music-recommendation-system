@@ -9,63 +9,6 @@ function getUserName() {
     return localStorage.getItem(CACHE_USER_NAME_KEY)
 }
 
-
-//document.getElementById('loginForm').addEventListener('submit', function(event) {
-//    event.preventDefault();
-//    var username = document.getElementById('loginUsername').value;
-//    var password = document.getElementById('loginPassword').value;
-//    debugger
-//    fetch('/login', {
-//        method: 'POST',
-//        headers: { 'Content-Type': 'application/json' },
-//        body: JSON.stringify({ username: username, password: password })
-//    })
-//    .then(response => response.json())
-//    .then(data => {
-//        if (data.success) {
-//            $('#loginModal').modal('hide');
-//            $('#LoginRegisterButtons').addClass('hidden');
-//            $('#LogoutButton').removeClass('hidden');
-//
-//            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
-//            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
-//
-//            refreshScreen()
-//        } else {
-//            alert('Login failed: ' + data.message);
-//        }
-//    })
-//    .catch(error => console.error('Error:', error));
-//});
-//
-//document.getElementById('registerForm').addEventListener('submit', function(event) {
-//    event.preventDefault();
-//    var username = document.getElementById('registerUsername').value;
-//    var password = document.getElementById('registerPassword').value;
-//    debugger
-//    fetch('/register', {
-//        method: 'POST',
-//        headers: { 'Content-Type': 'application/json' },
-//        body: JSON.stringify({ username: username, password: password })
-//    })
-//    .then(response => response.json())
-//    .then(data => {
-//        if (data.success) {
-//            $('#registerModal').modal('hide');
-//            $('#LoginRegisterButtons').addClass('hidden');
-//            $('#LogoutButton').removeClass('hidden');
-//
-//            localStorage.setItem(CACHE_USER_ID_KEY, data.user_id);
-//            localStorage.setItem(CACHE_USER_NAME_KEY, data.user_name);
-//
-//            refreshScreen()
-//        } else {
-//            alert('Registration failed: ' + data.message);
-//        }
-//    })
-//    .catch(error => console.error('Error:', error));
-//});
-
 function logout() {
     localStorage.setItem(CACHE_USER_ID_KEY, null);
     alert('You are logged out');
@@ -104,24 +47,34 @@ function processCSVData(csvData) {
 }
 
 function addSong() {
-    var songInput = document.getElementById('songInput').value.trim();
+    var song_input = document.getElementById('songInput').value.trim();
+    track_id = extractTrackId(song_input)
+
+//    if track_id {
+//        // link
+//    }
+//    else {
+//        // track_name = song_input
+//        // IGNORE
+//    }
+
     if (songInput) {
-        appendSongToLiked({
-            song: songInput,
-            artist: 'Artist Name',
-            album: 'Album Name',
-            year: '2021',
-            link: 'https://open.spotify.com/track/exampleLink'
-        }); // Append song to liked list dynamically
-        
-        // Example API call to save the song
-        fetch('/api/addSong', {
+        fetch('/like', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ song: songInput })
-        }).then(response => response.json())
-          .then(data => console.log(data))
-          .catch(error => console.error('Error:', error));
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: getUserId(),
+                track_id: track_id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data));
+            refreshLikedSongs();
+        }
+        .catch(error => console.error('Error:', error));
 
         document.getElementById('songInput').value = ''; // Clear input field
     } else {
@@ -185,13 +138,7 @@ function likeSong(button) {
     appendSongToLiked(songDetails);
     songItem.remove();
 
-//    var trackId = extractTrackId(songDetails.link);
-//    if (!trackId) {
-//        console.error('Invalid Spotify link:', songDetails.link);
-//        return;
-//    }
-
-    // API call to like the song
+    // update database
     fetch('/like', {
         method: 'POST',
         headers: {
@@ -205,6 +152,7 @@ function likeSong(button) {
     .then(response => response.json())
     .then(data => {
         console.log('Song liked:', data);
+        refreshLikedSongs()
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -223,7 +171,7 @@ function dislikeSong(button) {
     appendSongToDisliked(songDetails);
     songItem.remove();
 
-    // API call to dislike the song
+    // update database
     fetch('/dislike', {
         method: 'POST',
         headers: {
@@ -262,8 +210,8 @@ function removeSongFromList(button, listType) {
      .catch(error => console.error('Error:', error));
 }
 
-function refreshLikedSongs(user_id) {
-    user_id = getUserId()
+function refreshLikedSongs() {
+    var user_id = getUserId()
 
     fetch("/like/" + user_id)
     .then(response => response.json())
@@ -275,8 +223,8 @@ function refreshLikedSongs(user_id) {
     .catch(error => console.error('Error:', error));
 }
 
-function refreshDislikedSongs(user_id) {
-    user_id = getUserId()
+function refreshDislikedSongs() {
+    var user_id = getUserId()
 
     fetch("/dislike/" + user_id)
     .then(response => response.json())
@@ -288,8 +236,8 @@ function refreshDislikedSongs(user_id) {
     .catch(error => console.error('Error:', error));
 }
 
-function refreshRecommendedSongs(user_id) {
-    user_id = getUserId()
+function refreshRecommendedSongs() {
+    var user_id = getUserId()
 
     var recommendedSongsList = document.getElementById('recommendedSongsList');
     recommendedSongsList.innerHTML = ''; // Clear the list
