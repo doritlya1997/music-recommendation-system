@@ -1,10 +1,10 @@
 /* General Styles */
 body {
-    background-color: #f4f4f9;
+    background: linear-gradient(135deg, #ff6f61, #ffba00);
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    color: #333;
+    color: white;
 }
 
 .container {
@@ -16,7 +16,7 @@ body {
 /* Header */
 .page-title {
     margin-bottom: 40px;
-    color: #333;
+    color: white;
     text-align: center;
 }
 
@@ -26,7 +26,7 @@ body {
 }
 
 .page-title #username {
-    color: #007bff; /* Blue */
+    color: #ff6f61; /* Blue */
 }
 
 /* Input Component */
@@ -51,7 +51,7 @@ body {
 .input-component .btn {
     padding: 10px 20px;
     font-size: 1em;
-    background-color: #007bff; /* Blue */
+    background-color: #ff6f61; /* Blue */
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -61,7 +61,7 @@ body {
 }
 
 .input-component .btn:hover {
-    background-color: #0056b3; /* Darker blue */
+    background-color: #ffba00; /* Darker blue */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -112,19 +112,19 @@ body {
 }
 
 #likedSongsContainer {
-    border: 2px solid #4CAF50; /* Green */
+    border: 2px solid #ff6f61; /* Green */
     padding: 25px;
     background-color: #E8F5E9; /* Light green background */
 }
 
 #recommendedSongsContainer {
-    border: 2px solid #2196F3; /* Blue */
+    border: 2px solid #ff6f61; /* Blue */
     padding: 25px;
     background-color: #E3F2FD; /* Light blue background */
 }
 
 #dislikedSongsContainer {
-    border: 2px solid #F44336; /* Red */
+    border: 2px solid #ff6f61; /* Red */
     padding: 25px;
     background-color: #FFEBEE; /* Light red background */
 }
@@ -136,15 +136,15 @@ body {
 }
 
 #likedSongsContainer h2 {
-    color: #4CAF50; /* Green */
+    color: #ff6f61; /* Green */
 }
 
 #recommendedSongsContainer h2 {
-    color: #2196F3; /* Blue */
+    color: #ff6f61; /* Blue */
 }
 
 #dislikedSongsContainer h2 {
-    color: #F44336; /* Red */
+    color: #ff6f61; /* Red */
 }
 
 .list-group-item {
@@ -164,11 +164,11 @@ body {
 .item-details span {
     display: block;
     margin-bottom: 5px;
-    color: #555;
+    color: white;
 }
 
 .item-details a {
-    color: #007bff; /* Blue */
+    color: #ff6f61; /* Blue */
     text-decoration: none;
 }
 
@@ -186,7 +186,7 @@ body {
 .button-group .btn {
     flex: 1;
     margin: 0 5px;
-    background-color: #4CAF50; /* Green */
+    background-color: #ff6f61; /* Green */
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -200,11 +200,11 @@ body {
 }
 
 .button-group .btn-danger {
-    background-color: #F44336; /* Red */
+    background-color: #ff6f61; /* Red */
 }
 
 .button-group .btn-danger:hover {
-    background-color: #D32F2F; /* Darker red */
+    background-color: #ff6f61; /* Darker red */
 }
 
 /* General Button Styles */
@@ -214,7 +214,7 @@ body {
 }
 
 .btn:hover {
-    background-color: #0056b3; /* Darker blue */
+    background-color: #ffba00; /* Darker blue */
     color: #fff;
 }
 
@@ -222,7 +222,7 @@ body {
 a:focus,
 button:focus,
 input:focus {
-    outline: 2px solid #0056b3; /* Darker blue */
+    outline: 2px solid #ffba00; /* Darker blue */
     outline-offset: 2px;
 }
 /*******/
@@ -332,7 +332,7 @@ input:focus {
 }
 
 .listen-link {
-    color: #007bff !important;
+    color: #ff6f61 !important;
     text-decoration: none !important;
 }
 
@@ -347,7 +347,7 @@ input:focus {
     padding: 14px 28px; /* More padding for a better feel */
     font-size: 18px; /* Larger font size */
     font-weight: bold; /* Bold text */
-    background-color: #007bff; /* Blue background */
+    background-color: #ff6f61; /* Blue background */
     color: #fff; /* White text */
     border: none;
     border-radius: 25px; /* Rounded corners */
@@ -357,7 +357,7 @@ input:focus {
 }
 
 .btn-refresh:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #ffba00; /* Darker blue on hover */
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
     transform: scale(1.05); /* Slightly enlarge on hover */
 }
