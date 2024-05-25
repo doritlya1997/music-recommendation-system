@@ -50,14 +50,6 @@ function addSong() {
     var song_input = document.getElementById('songInput').value.trim();
     track_id = extractTrackId(song_input)
 
-//    if track_id {
-//        // link
-//    }
-//    else {
-//        // track_name = song_input
-//        // IGNORE
-//    }
-
     if (songInput) {
         fetch('/like', {
             method: 'POST',
