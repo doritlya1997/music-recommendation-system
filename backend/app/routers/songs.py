@@ -18,9 +18,9 @@ def signup(user: User):
 
 
 @router.post("/login")
-def login(user: User):
-    user = crud.authenticate_user(user.username, user.password)
-    if not user or not verify_password(user.password, user['hashed_password']):
+def login(user_input: User):
+    user = crud.authenticate_user(user_input.username, user_input.password)
+    if not user or not verify_password(user_input.password, user['hashed_password']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     return {"username": user['username']}
 
