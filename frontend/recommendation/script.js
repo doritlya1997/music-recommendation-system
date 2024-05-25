@@ -9,14 +9,8 @@ function getUserName() {
     return localStorage.getItem(CACHE_USER_NAME_KEY)
 }
 
-function logout() {
-    localStorage.setItem(CACHE_USER_ID_KEY, null);
-    refreshScreen();
-}
-
 document.getElementById('logoutBtn').addEventListener('click', function() {
             localStorage.removeItem(CACHE_USER_ID_KEY);
-            alert('You are logged out');
             window.location.href = '/';
         });
 
