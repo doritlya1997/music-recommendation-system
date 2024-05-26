@@ -66,7 +66,7 @@ def get_tracks_df(user_id: int, type: str):
     else:
         tuples_list = crud.get_disliked_tracks(user_id)
 
-    columns = [ # TODO: delete irrelevant
+    columns = [
         "track_id",
         "id",
         "artist_name",
@@ -163,6 +163,9 @@ def get_recommendations_by_user_listening_history(user_id: int):
     # TODO: if empty, no recommendation!!!
     user_likes_playlist = get_tracks_df(user_id, type="like")
     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
+
+    if len(user_likes_playlist) == 0:
+        return []
 
     user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
     user_likes_other_cols_df = user_likes_playlist[other_cols]
