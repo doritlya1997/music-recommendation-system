@@ -199,3 +199,4 @@ def get_recommendations_by_user_listening_history(user_id: int):
 
     lod = top_similarities.to_dict('records')
     return lod
+
