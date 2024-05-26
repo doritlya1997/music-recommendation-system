@@ -43,16 +43,20 @@ def upload_csv(request: CSVUploadRequest):
     if affected_rows == 0:
         return {"status": "200", "message": "All liked tracks already exist", "affected_rows": affected_rows}
     elif affected_rows > 0:
-        return {"status": "200", "message": "Likes were inserted successfully", "affected_rows": affected_rows}
+        return {"status": "200", "message": "Likes were added successfully", "affected_rows": affected_rows}
     elif affected_rows == False:
         raise HTTPException(status_code=404, detail="User not found")
 
 
 @router.post("/like")
 def add_like(request: UserTrackRequest):
-    if not crud.add_like(request.user_id, request.track_id):
+    affected_rows = crud.add_like(request.user_id, request.track_id)
+    if affected_rows == 0:
+        return {"status": "200", "message": "Liked track already exists", "affected_rows": affected_rows}
+    elif affected_rows > 0:
+        return {"status": "200", "message": "Like was added successfully", "affected_rows": affected_rows}
+    elif affected_rows == False:
         raise HTTPException(status_code=400, detail="User not found")
-    return {"status": "200"}
 
 
 @router.post("/dislike")

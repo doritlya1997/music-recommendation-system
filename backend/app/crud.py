@@ -113,7 +113,8 @@ def add_like(user_id: int, track_id: str):
                 ON CONFLICT (user_id, track_id) DO NOTHING;
                 """, (user_id, track_id))
             conn.commit()
-            return True
+            affected_rows = cur.rowcount
+            return affected_rows
 
 
 def add_dislike(user_id: int, track_id: str):

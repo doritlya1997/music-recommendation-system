@@ -95,6 +95,10 @@ function addSong() {
         })
         .then(response => response.json())
         .then(data => {
+            if (data.affected_rows > 0)
+                alert(data.affected_rows + " " + data.message)
+            else
+                alert(data.message)
             console.log('Song liked:', data);
             refreshLikedSongs();
         })
