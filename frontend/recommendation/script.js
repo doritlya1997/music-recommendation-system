@@ -105,8 +105,9 @@ function addSong() {
     }
 }
 
-function generateSongHTML({ track_id, track_name, artist_name, year, link, relevance_percentage }, actions) {
-    percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
+function generateSongHTML({ track_id, track_name, artist_name, year, relevance_percentage }, actions) {
+    let percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
+    let link = 'https://open.spotify.com/track/' +  track_id
 
     return `
         <div class="list-group-item">
@@ -160,7 +161,7 @@ function likeSong(button) {
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-        link: songItem.querySelector('.listen-link').href
+//        link: songItem.querySelector('.listen-link').href
     };
 
     appendSongToLiked(songDetails);
@@ -194,7 +195,7 @@ function dislikeSong(button) {
         song: songItem.querySelector('.track-name').textContent,
         artist: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-        link: songItem.querySelector('.listen-link').href
+//        link: songItem.querySelector('.listen-link').href
     };
     appendSongToDisliked(songDetails);
     songItem.remove();
