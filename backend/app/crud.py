@@ -28,7 +28,7 @@ def get_likes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT t.track_id, t.track_name, t.artist_name, 0 as year, concat('https://open.spotify.com/track/', t.track_id) as link
+                SELECT t.track_id, t.track_name, t.artist_name, year, concat('https://open.spotify.com/track/', t.track_id) as link
                 FROM likes l
                 JOIN users u ON l.user_id = u.id
                 JOIN tracks t ON l.track_id = t.track_id
@@ -56,7 +56,7 @@ def get_dislikes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT t.track_id, t.track_name, t.artist_name, 0 as year, concat('https://open.spotify.com/track/', t.track_id) as link
+                SELECT t.track_id, t.track_name, t.artist_name, year, concat('https://open.spotify.com/track/', t.track_id) as link
                 FROM dislikes d
                 JOIN users u ON d.user_id = u.id
                 JOIN tracks t ON d.track_id = t.track_id

@@ -173,11 +173,11 @@ def process_data_write_csv_just_spark(spark: SparkSession):
             .withColumn('year_2010_2014', F.when(F.col('year').between(2010, 2014), 1).otherwise(0)) \
             .withColumn('year_2015_2019', F.when(F.col('year').between(2015, 2019), 1).otherwise(0)) \
             .withColumn('year_2020_2024', F.when(F.col('year').between(2020, 2024), 1).otherwise(0)) \
-            .drop('year')
+            # .drop('year')
 
-        all_columns = ['track_id', '_c0', 'artist_name', 'track_name', 'popularity', 'year', 'genre', 'danceability',
-                       'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness',
-                       'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature']
+        # all_columns = ['track_id', '_c0', 'artist_name', 'track_name', 'popularity', 'year', 'genre', 'danceability',
+        #                'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness',
+        #                'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature']
         scale_columns = ['popularity', 'loudness', 'tempo']
         min_row = Row(popularity=0, loudness=-60, tempo=0)
         max_row = Row(popularity=100, loudness=0, tempo=250)
@@ -208,7 +208,6 @@ def process_data_write_csv_just_spark(spark: SparkSession):
         # Assemble all columns into a single feature vector
         assembler = VectorAssembler(inputCols=scale_columns, outputCol="features")
         feat_vec = assembler.transform(feat_vec)
-
 
         # Scale the features
         scaler = MinMaxScaler(inputCol="features", outputCol="scaled_features")
@@ -253,8 +252,7 @@ def process_data_write_csv_just_spark(spark: SparkSession):
         # spark_df = spark.createDataFrame(pandas_df)
         # spark_df.printSchema()
         # spark_df.show()
-        feat_vec.write.mode("overwrite").parquet(f"./data_ready_for_db_parquet")
-
+        feat_vec.write.mode("overwrite").parquet(f"./data_ready_for_db_parquet2")
 
     schemaaa = """
     track_id STRING, id INT, artist_name STRING, track_name STRING, popularity INT, year INT, genre STRING, danceability FLOAT, energy FLOAT, key INT, loudness FLOAT, mode INT, speechiness FLOAT, acousticness FLOAT, instrumentalness FLOAT, liveness FLOAT, valence FLOAT, tempo FLOAT, duration_ms INT, time_signature INT
@@ -271,14 +269,17 @@ def process_data_write_csv_just_spark(spark: SparkSession):
 
 
 def validate_result(spark):
-    result_df = (spark.read.csv("./data_ready_for_db.csv", header=True, inferSchema=True))
-    # print(result_df.count()) # 999,401 records
-    result_df.schema
+    # result_df = (spark.read.parquet("./data_ready_for_db.csv", header=True, inferSchema=True))
+    result_df = (spark.read.parquet("./data_ready_for_db_parquet2"))
+
+    print(result_df.count())  # 999,401 records
+    print(result_df.schema)
     # |-- track_id: string (nullable = true)
     # |-- id: integer (nullable = true)
     # |-- artist_name: string (nullable = true)
     # |-- track_name: string (nullable = true)
     # |-- popularity: double (nullable = true)
+    # |-- year: integer (nullable = true)
     # |-- genre: string (nullable = true)
     # |-- danceability: double (nullable = true)
     # |-- energy: double (nullable = true)
@@ -324,20 +325,21 @@ def write_data_to_postgres(spark: SparkSession):
         StructField("artist_name", StringType(), True),
         StructField("track_name", StringType(), True),
         StructField("popularity", DoubleType(), True),
+        StructField("year", IntegerType(), True),
         StructField("genre", StringType(), True),
-        StructField("danceability", DoubleType(), True),
-        StructField("energy", DoubleType(), True),
+        StructField("danceability", FloatType(), True), # change double->float
+        StructField("energy", FloatType(), True),
         StructField("key", IntegerType(), True),
         StructField("loudness", DoubleType(), True),
         StructField("mode", IntegerType(), True),
-        StructField("speechiness", DoubleType(), True),
-        StructField("acousticness", DoubleType(), True),
-        StructField("instrumentalness", DoubleType(), True),
-        StructField("liveness", DoubleType(), True),
-        StructField("valence", DoubleType(), True),
+        StructField("speechiness", FloatType(), True),
+        StructField("acousticness", FloatType(), True),
+        StructField("instrumentalness", FloatType(), True),
+        StructField("liveness", FloatType(), True),
+        StructField("valence", FloatType(), True),
         StructField("tempo", DoubleType(), True),
-        StructField("duration_ms", StringType(), True),
-        StructField("time_signature", StringType(), True),
+        StructField("duration_ms", IntegerType(), True),
+        StructField("time_signature", IntegerType(), True),
         StructField("year_2000_2004", IntegerType(), True),
         StructField("year_2005_2009", IntegerType(), True),
         StructField("year_2010_2014", IntegerType(), True),
@@ -348,10 +350,11 @@ def write_data_to_postgres(spark: SparkSession):
     (spark
         .readStream
         .option("maxFilesPerTrigger", 1)
-        .csv("./data_ready_for_db.csv/", header=True, schema=schema)
+        .schema(schema)
+        .parquet("./data_ready_for_db_parquet2/")
         .writeStream
         .trigger(availableNow=True)
-        .option("checkpointLocation", "./checkpointLocation/load_to_psg/")
+        .option("checkpointLocation", "./checkpointLocation/load_to_psg_2/")
         .foreachBatch(process_batch)
         # .outputMode("append")
         .start()
@@ -444,9 +447,11 @@ def try_feature_scaler(spark: SparkSession):
 def preprocess(spark: SparkSession):
     # get_track_id_counts(spark)
     # drop_duplicate_track_id_songs(spark)
-    process_data_write_csv_just_spark(spark)
+    # process_data_write_csv_just_spark(spark)
     # validate_result(spark)
     # write_data_to_postgres(spark)
+    pass
+
 
 ############### QUERY DB
 
@@ -572,7 +577,7 @@ def get_recommandations(user_id=2):
     other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'time_signature', 'track_id', 'track_name']
 
     tracks_df = pd.concat(map(partial(pd.read_parquet),
-                       glob.glob("./data_ready_for_db_parquet/*.parquet")))
+                              glob.glob("data_ready_for_db_without_year_parquet/*.parquet")))
     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
     tracks_other_cols_df = tracks_df[other_cols]
     display(tracks_df)
@@ -672,11 +677,11 @@ def sandbox():
 
 
 if __name__ == "__main__":
-    # spark = config_spark()
+    spark = config_spark()
     print("hello")
-    # preprocess(spark)
+    preprocess(spark)
     print("end")
-    get_recommandations()
+    # get_recommandations()
 
 
 

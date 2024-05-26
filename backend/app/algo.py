@@ -72,6 +72,7 @@ def get_tracks_df(user_id: int, type: str):
         "artist_name",
         "track_name",
         "popularity",
+        "year",
         "genre",
         "danceability",
         "energy",
@@ -150,7 +151,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
         "year_2020_2024",
         "update_timestamp"
     ]
-    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'time_signature', 'track_id', 'track_name']
+    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
 
     tracks_df = pd.concat(map(partial(pd.read_parquet),
                               glob.glob("scripts/data_ready_for_db_parquet/*.parquet")))
@@ -174,12 +175,10 @@ def get_recommendations_by_user_listening_history(user_id: int):
     user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
 
     similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
-    tracks_similarity_df['similarity_score'] = similarity_scores
-    tracks_similarity_df['similarity_score'] = tracks_similarity_df['similarity_score'].mul(100).round(1)
+    tracks_similarity_df['relevance_percentage'] = similarity_scores
+    tracks_similarity_df['relevance_percentage'] = tracks_similarity_df['relevance_percentage'].mul(100).round(1)
 
-
-    # TODO: join `tracks_other_cols_df` back
-    # Reset indices to ensure uniqueness
+    # Reset indexes to ensure uniqueness
     tracks_similarity_df = tracks_similarity_df.reset_index(drop=True)
     tracks_other_cols_df = tracks_other_cols_df.reset_index(drop=True)
     display(tracks_similarity_df)
@@ -187,14 +186,14 @@ def get_recommendations_by_user_listening_history(user_id: int):
     scored_tracks_df = pd.concat([tracks_similarity_df, tracks_other_cols_df], axis=1, join='inner')
 
     # remove tracks which are already liked/disliked
-    top_similarities = scored_tracks_df.sort_values(by='similarity_score', ascending=False)
+    top_similarities = scored_tracks_df.sort_values(by='relevance_percentage', ascending=False)
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_likes_playlist['track_id'])]
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
     top_similarities = top_similarities.head(10)
+    # top_similarities['link'] = 'https://open.spotify.com/track/' + top_similarities['track_id']
 
-    # TODO fix year, and select top_similarities['year']
-    top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'similarity_score', 'year_2020_2024']]
-    top_similarities = top_similarities.rename(columns={'year_2020_2024': 'year', 'similarity_score': 'relevance_percentage'})
+    top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
+    # top_similarities = top_similarities.rename(columns={'similarity_score': 'relevance_percentage'})
 
     display(top_similarities)
 
