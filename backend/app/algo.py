@@ -175,6 +175,8 @@ def get_recommendations_by_user_listening_history(user_id: int):
 
     similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
     tracks_similarity_df['similarity_score'] = similarity_scores
+    tracks_similarity_df['similarity_score'] = tracks_similarity_df['similarity_score'].mul(100).round(1)
+
 
     # TODO: join `tracks_other_cols_df` back
     # Reset indices to ensure uniqueness
