@@ -293,7 +293,7 @@ function refreshRecommendedSongs() {
     })
     .catch(error => {
         $("#recommendationsLoader").addClass("hidden");
-        console.error('Error:', error));
+        console.error('Error:', error);
     }
 }
 
