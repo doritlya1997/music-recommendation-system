@@ -105,12 +105,17 @@ function addSong() {
     }
 }
 
-function generateSongHTML({ track_id, track_name, artist_name, year, link }, actions) {
+function generateSongHTML({ track_id, track_name, artist_name, year, link, relevance_percentage }, actions) {
+    percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
+
     return `
         <div class="list-group-item">
             <div class="item-details">
                 <span class="track-id hidden">${track_id}</span>
-                <span class="track-name">${track_name}</span>
+                <div class="track-name-container">
+                    <span class="track-name">${track_name}</span>
+                    ${percentage_element}
+                </div>
                 <span class="artist-name">${artist_name}</span>
                 <span class="year">(${year})</span>
                 <a href="${link}" target="_blank" class="listen-link">Listen on Spotify</a>

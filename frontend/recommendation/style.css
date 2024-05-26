@@ -381,3 +381,37 @@ input:focus {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Style for percentage display */
+.percentage {
+    font-weight: bold;
+    display: inline-block;
+    padding: 5px 10px;
+    margin-left: auto; /* Align to the right */
+    background-color: #ff9800; /* Orange background */
+    color: white; /* White text */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 0.9em; /* Smaller font size */
+    font-weight: bold; /* Bold text */
+    transition: transform 0.3s, box-shadow 0.3s; /* Animation on hover */
+}
+
+.percentage:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+.item-details {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.track-name-container {
+    display: flex;
+    align-items: center;
+}
+
+.track-name {
+    flex: 1;
+    font-weight: bold;
+}
