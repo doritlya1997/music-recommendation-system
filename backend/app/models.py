@@ -21,5 +21,5 @@ class UserTrackRequest(BaseModel):
 
 
 class CSVUploadRequest(BaseModel):
-    username: str
+    user_id: int
     track_ids: List[str]

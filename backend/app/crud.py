@@ -80,20 +80,24 @@ def get_disliked_tracks(user_id: int):
             return tracks
 
 
-def upload_csv(username: str, track_ids: list):
+def upload_csv(user_id: int, track_ids: list):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE username = %s;", (username,))
+            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
             if not user:
                 return False
-            user_id = user['id']
+
+            affected_rows = 0
             for track_id in track_ids:
                 cur.execute("""
-                    INSERT INTO likes (user_id, track_id) VALUES (%s, %s);
-                """, (user_id, track_id))
+                    INSERT INTO likes (user_id, track_id) 
+                    VALUES (%s, %s)
+                    ON CONFLICT (user_id, track_id) DO NOTHING;
+                    """, (user_id, track_id))
+                affected_rows += cur.rowcount
             conn.commit()
-            return True
+            return affected_rows
 
 
 def add_like(user_id: int, track_id: str):
@@ -103,7 +107,11 @@ def add_like(user_id: int, track_id: str):
             user = cur.fetchone()
             if not user:
                 return False
-            cur.execute("""INSERT INTO likes (user_id, track_id) VALUES (%s, %s);""", (user_id, track_id))
+            cur.execute("""
+                INSERT INTO likes (user_id, track_id) 
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, track_id) DO NOTHING;
+                """, (user_id, track_id))
             conn.commit()
             return True
 
@@ -115,7 +123,11 @@ def add_dislike(user_id: int, track_id: str):
             user = cur.fetchone()
             if not user:
                 return False
-            cur.execute("""INSERT INTO dislikes (user_id, track_id) VALUES (%s, %s);""", (user_id, track_id))
+            cur.execute("""
+                INSERT INTO dislikes (user_id, track_id) 
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, track_id) DO NOTHING;
+                """, (user_id, track_id))
             conn.commit()
             return True
 
