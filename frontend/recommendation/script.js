@@ -9,11 +9,10 @@ function getUserName() {
     return localStorage.getItem(CACHE_USER_NAME_KEY)
 }
 
-function logout() {
-    localStorage.setItem(CACHE_USER_ID_KEY, null);
-    alert('You are logged out');
-    refreshScreen();
-}
+document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem(CACHE_USER_ID_KEY);
+            window.location.href = '/';
+        });
 
 document.getElementById('csvFileInput').addEventListener('change', function(event) {
     var file = event.target.files[0];
@@ -276,9 +275,16 @@ function refreshRecommendedSongs() {
     .catch(error => console.error('Error:', error));
 }
 
+// Check if user is logged in
+const user_id = localStorage.getItem('user_id');
+if (!user_id) {
+    window.location.href = '/';
+};
+
+
 function refreshScreen() {
-    user_id = getUserId()
-    user_name = getUserName()
+    var user_id = getUserId()
+    var user_name = getUserName()
     if (user_id) {
         $("#username").text(user_name)
         refreshLikedSongs()

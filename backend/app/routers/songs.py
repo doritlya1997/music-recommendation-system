@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, APIRouter
 from .. import crud, algo
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
@@ -13,7 +13,7 @@ def register(user: User):
     hashed_password = hash_password(user.password)
     dbuser = crud.create_user(user.username, hashed_password)
     if not dbuser:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Username already exists")
     return {'user_id': dbuser['user_id'],
             'user_name': dbuser['user_name']}
 
@@ -80,7 +80,6 @@ def remove_dislike(request: UserTrackRequest):
 @router.get("/recommendation/{user_id}", response_model=List[Track])
 def get_recommendations(user_id: int):
     return algo.get_recommendations_by_user_listening_history(user_id)
-
 
 # TODO: recommendation by user listening history
 # TODO: recommendation by similar user - top tracks

@@ -1,0 +1,13 @@
+*.log
+*.md
+*.zip
+*.gz
+*.tgz
+*.tar
+__pycache__
+node_modules
+tests
+docs
+myenv
+scripts
+.venv

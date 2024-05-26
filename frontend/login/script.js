@@ -33,24 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
 
-        fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                loginError.textContent = `${errorData.detail}`;
+                return;
+            }
+
+            const data = await response.json();
             console.log('user logged in:', data);
             localStorage.setItem('user_id', data.user_id);
             localStorage.setItem('user_name', data.user_name);
             window.location.href = '/static/recommendation/index.html';
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-            loginError.textContent = error.message;
-        });
+        } catch (error) {
+            loginError.textContent = "An unexpected error occurred.";
+        }
     });
 
     registerForm.addEventListener('submit', async function(event) {
@@ -58,24 +63,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('registerUsername').value;
         const password = document.getElementById('registerPassword').value;
 
-        fetch('/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('user registered:', data);
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                registerError.textContent = `${errorData.detail}`;
+                return;
+            }
+
+            const data = await response.json();
+            console.log('user logged in:', data);
             localStorage.setItem('user_id', data.user_id);
             localStorage.setItem('user_name', data.user_name);
             window.location.href = '/static/recommendation/index.html';
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-            registerError.textContent = error.message;
-        });
+        } catch (error) {
+            registerError.textContent = "An unexpected error occurred.";
+        }
     });
 
     // Check if user is logged in
