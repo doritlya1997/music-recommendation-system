@@ -190,11 +190,8 @@ def get_recommendations_by_user_listening_history(user_id: int):
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_likes_playlist['track_id'])]
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
     top_similarities = top_similarities.head(10)
-    # top_similarities['link'] = 'https://open.spotify.com/track/' + top_similarities['track_id']
 
     top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
-    # top_similarities = top_similarities.rename(columns={'similarity_score': 'relevance_percentage'})
-
     display(top_similarities)
 
     lod = top_similarities.to_dict('records')
