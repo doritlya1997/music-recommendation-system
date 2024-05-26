@@ -291,7 +291,10 @@ function refreshRecommendedSongs() {
         $("#recommendationsLoader").addClass("hidden");
         data.forEach(song => appendSongToRecommendations(song));
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        $("#recommendationsLoader").addClass("hidden");
+        console.error('Error:', error));
+    }
 }
 
 // Check if user is logged in
