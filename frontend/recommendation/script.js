@@ -127,17 +127,18 @@ function generateSongHTML({ track_id, track_name, artist_name, year, relevance_p
         </div>
     `;
 }
-// TODO: append at the beginning
-function appendSongToLiked(songDetails) {
+
+function appendSongToLiked(songDetails, where) {
     var likedSongsList = document.getElementById('likedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
-    likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+
+    likedSongsList.innerHTML = generateSongHTML(songDetails, actions) + likedSongsList.innerHTML;
 }
 
 function appendSongToDisliked(songDetails) {
     var dislikedSongsList = document.getElementById('dislikedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'dislike')"><i class="fa fa-trash"></i> Remove</button>`;
-    dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+    dislikedSongsList.innerHTML = generateSongHTML(songDetails, actions) + dislikedSongsList.innerHTML;
 }
 
 function appendSongToRecommendations(songDetails) {
@@ -192,8 +193,8 @@ function dislikeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
         track_id: songItem.querySelector('.track-id').textContent,
-        song: songItem.querySelector('.track-name').textContent,
-        artist: songItem.querySelector('.artist-name').textContent,
+        track_name: songItem.querySelector('.track-name').textContent,
+        artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
 //        link: songItem.querySelector('.listen-link').href
     };
@@ -214,6 +215,7 @@ function dislikeSong(button) {
     .then(response => response.json())
     .then(data => {
         console.log('Song disliked:', data);
+        refreshDislikedSongs();
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);

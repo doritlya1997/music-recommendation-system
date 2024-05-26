@@ -33,7 +33,7 @@ def get_likes(user_id: int):
                 JOIN users u ON l.user_id = u.id
                 JOIN tracks t ON l.track_id = t.track_id
                 WHERE u.id = %s
-                ORDER BY l.update_timestamp DESC;
+                ORDER BY l.update_timestamp ASC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks
@@ -61,7 +61,7 @@ def get_dislikes(user_id: int):
                 JOIN users u ON d.user_id = u.id
                 JOIN tracks t ON d.track_id = t.track_id
                 WHERE u.id = %s
-                ORDER BY d.update_timestamp DESC;
+                ORDER BY d.update_timestamp ASC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks
@@ -154,15 +154,3 @@ def remove_dislike(user_id: int, track_id: str):
             cur.execute("""DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
             return True
-
-
-def get_recommendations():
-    with get_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT track_id, track_name, artist_name, year, relevance_percentage
-                FROM tracks
-                ORDER BY relevance_percentage DESC;
-            """)
-            tracks = cur.fetchall()
-            return tracks
