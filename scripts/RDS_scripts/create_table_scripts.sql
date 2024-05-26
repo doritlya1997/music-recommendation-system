@@ -1,5 +1,6 @@
 DROP TABLE tracks;
 
+-- TODO: update according to db current state
 CREATE TABLE tracks (
     track_id VARCHAR PRIMARY KEY,
     id INTEGER,

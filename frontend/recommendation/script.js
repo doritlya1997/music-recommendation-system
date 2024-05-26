@@ -242,11 +242,14 @@ function removeSongFromList(button, listType) {
 function refreshLikedSongs() {
     var user_id = getUserId()
 
+    var likedSongsList = document.getElementById('likedSongsList');
+    likedSongsList.innerHTML = ''; // Clear the list
+    $("#likedLoader").removeClass("hidden");
+
     fetch("/like/" + user_id)
     .then(response => response.json())
     .then(data => {
-        var likedSongsList = document.getElementById('likedSongsList');
-        likedSongsList.innerHTML = ''; // Clear the list
+        $("#likedLoader").addClass("hidden");
         data.forEach(song => appendSongToLiked(song));
     })
     .catch(error => console.error('Error:', error));
@@ -255,11 +258,14 @@ function refreshLikedSongs() {
 function refreshDislikedSongs() {
     var user_id = getUserId()
 
+    var dislikedSongsList = document.getElementById('dislikedSongsList');
+    dislikedSongsList.innerHTML = ''; // Clear the list
+    $("#dislikedLoader").removeClass("hidden");
+
     fetch("/dislike/" + user_id)
     .then(response => response.json())
     .then(data => {
-        var dislikedSongsList = document.getElementById('dislikedSongsList');
-        dislikedSongsList.innerHTML = ''; // Clear the list
+        $("#dislikedLoader").addClass("hidden");
         data.forEach(song => appendSongToDisliked(song));
     })
     .catch(error => console.error('Error:', error));
