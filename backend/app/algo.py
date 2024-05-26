@@ -104,14 +104,14 @@ def get_tracks_df(user_id: int, type: str):
 def weighted_mean(df, col="update_timestamp"):
     # print(df.dtypes)
     date_col = df[col]
-    quantiles_values = date_col.quantile([0, 0.25, 0.5, 0.75, 1], interpolation="nearest")
+    quantiles_values = date_col.quantile([0.25, 0.5, 0.75], interpolation="nearest")
     print(quantiles_values)
 
-    min_date = df.at[0.00, col]
-    max_date = df.at[1.00, col]
+    min_date = df.min()
+    max_date = df.max()
 
-    # if short period of tim
-    if (max_date - min_date).days < 7:
+    # check if short period of tim
+    if (max_date['update_timestamp'] - min_date['update_timestamp']).days < 7:
         mean_df = df.mean().drop(col)
     else:
         # calculate each quantile mean and multiply be matching weight
@@ -159,8 +159,6 @@ def get_recommendations_by_user_listening_history(user_id: int):
     tracks_other_cols_df = tracks_df[other_cols]
     display(tracks_df)
 
-
-    # TODO: if empty, no recommendation!!!
     user_likes_playlist = get_tracks_df(user_id, type="like")
     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
 
@@ -191,7 +189,9 @@ def get_recommendations_by_user_listening_history(user_id: int):
     # remove tracks which are already liked/disliked
     top_similarities = scored_tracks_df.sort_values(by='relevance_percentage', ascending=False)
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_likes_playlist['track_id'])]
-    top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
+
+    if len(user_dislikes_playlist) > 0:
+        top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
     top_similarities = top_similarities.head(10)
 
     top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
