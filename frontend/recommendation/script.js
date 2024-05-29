@@ -310,6 +310,7 @@ if (!user_id) {
 };
 
 
+
 function refreshScreen() {
     var user_id = getUserId()
     var user_name = getUserName()
