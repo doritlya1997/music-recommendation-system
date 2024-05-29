@@ -11,6 +11,7 @@ function getUserName() {
 
 document.getElementById('logoutBtn').addEventListener('click', function() {
             localStorage.removeItem(CACHE_USER_ID_KEY);
+            localStorage.removeItem(CACHE_USER_NAME_KEY);
             window.location.href = '/';
         });
 
@@ -77,11 +78,16 @@ function processCSVData(csvData) {
      }
 }
 
+
 // Add single track from input using spotify_link and track_id
 function addSong() {
     var song_input = document.getElementById('songInput').value.trim();
-    track_id = extractTrackId(song_input)
+    if (!song_input) {
+        alert('Please enter a Spotify song link or upload a CSV file.');
+        return
+    }
 
+    track_id = extractTrackId(song_input)
     if (track_id) {
         fetch('/like', {
             method: 'POST',
@@ -106,7 +112,7 @@ function addSong() {
 
         document.getElementById('songInput').value = '';
     } else {
-        alert('Please enter a Spotify song link or upload a CSV file.');
+        alert('This is not a Spotify song link.');
     }
 }
 
@@ -236,7 +242,7 @@ function removeSongFromList(button, listType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
                     user_id: user_id,
-                    track_id: songItem.querySelector('.track_id').textContent
+                    track_id: songItem.querySelector('.track-id').textContent
                 })
     })
     .then(response => response.json())
@@ -294,7 +300,7 @@ function refreshRecommendedSongs() {
     .catch(error => {
         $("#recommendationsLoader").addClass("hidden");
         console.error('Error:', error);
-    }
+    })
 }
 
 // Check if user is logged in
