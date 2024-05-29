@@ -78,6 +78,7 @@ function processCSVData(csvData) {
      }
 }
 
+
 // Add single track from input using spotify_link and track_id
 function addSong() {
     var song_input = document.getElementById('songInput').value.trim();
