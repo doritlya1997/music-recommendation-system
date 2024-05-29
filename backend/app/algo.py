@@ -157,7 +157,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
     print(os.getcwd())
 
     tracks_df = pd.concat(map(partial(pd.read_parquet),
-                              glob.glob("../../scripts/data_ready_for_db_parquet/*.parquet")))
+                              glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
     tracks_other_cols_df = tracks_df[other_cols]
     display(tracks_df)
