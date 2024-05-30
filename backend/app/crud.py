@@ -172,7 +172,7 @@ def get_tracks_by_id_and_score(top_tracks: list[tuple]):
             ) AS derived_table(track_id_col, relevance_percentage)
         ) AS recommended
         ON tracks.track_id = recommended.track_id_col;"""
-    print(query)
+    # print(query)
 
     with get_db() as conn:
         with conn.cursor() as cur:
