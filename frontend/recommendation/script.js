@@ -28,9 +28,12 @@ document.getElementById('csvFileInput').addEventListener('change', function(even
 });
 
 function processCSVData(csvData) {
+    document.getElementById('loader-overlay').classList.remove('hidden'); // Show loader overlay
+
     var dataLines = csvData.split(/\r\n|\n/);
     if (dataLines.length <= 1) {
         alert('The CSV file is empty or improperly formatted.');
+        document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
         return;
     }
     var headers = dataLines[0].split(',');
@@ -42,16 +45,15 @@ function processCSVData(csvData) {
         if (!error_occurred) {
             var columns = row.split(',');
             if (columns.length === headers.length) {
-                track_id_list.push(columns[0]);
+                track_id_list.push(extractTrackId(columns[0]));
             } else {
                 alert('CSV Row does not match header length:', row);
-                error_occurred = true
+                error_occurred = true;
             }
         }
     });
 
-
-     if (!error_occurred) {
+    if (!error_occurred) {
         fetch('/like/csv', {
             method: 'POST',
             headers: {
@@ -64,19 +66,26 @@ function processCSVData(csvData) {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.affected_rows > 0)
-                alert(data.affected_rows + " " + data.message)
-            else
-                alert(data.message)
-            console.log('Songs liked:', data);
-            refreshLikedSongs();
+            if (data.affected_rows > 0) {
+                alert(data.affected_rows + " " + data.message);
+                console.log('Songs liked:', data);
+                refreshLikedSongs();
+            } else {
+                alert(data.message);
+            }
+            document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
+        });
 
         document.getElementById('songInput').value = ''; // Clear input field
-
-     }
+    } else {
+        document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
+    }
 }
+
 
 
 // Add single track from input using spotify_link and track_id
@@ -101,14 +110,17 @@ function addSong() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.affected_rows > 0)
+            if (data.affected_rows > 0) {
                 alert(data.affected_rows + " " + data.message)
-            else
-                alert(data.message)
-            console.log('Song liked:', data);
-            refreshLikedSongs();
+                console.log('Song liked:', data);
+                refreshLikedSongs();
+            } else {
+                alert(data.message);
+            }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+        });
 
         document.getElementById('songInput').value = '';
     } else {
@@ -176,28 +188,37 @@ function likeSong(button) {
 //        link: songItem.querySelector('.listen-link').href
     };
 
-    appendSongToLiked(songDetails);
-    songItem.remove();
-
-    // update database
-    fetch('/like', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            user_id: user_id,
-            track_id: songDetails.track_id
+    if (songDetails.track_id) {
+        fetch('/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: getUserId(),
+                track_id: songDetails.track_id
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Song liked:', data);
-        refreshLikedSongs();
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.affected_rows > 0) {
+                alert(data.affected_rows + " " + data.message)
+                console.log('Song liked:', data);
+                appendSongToLiked(songDetails);
+                refreshLikedSongs();
+            } else {
+                alert(data.message)
+            }
+            songItem.remove();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        document.getElementById('songInput').value = '';
+    } else {
+        alert('This is not a Spotify song link.');
+    }
 }
 
 function dislikeSong(button) {
@@ -219,7 +240,7 @@ function dislikeSong(button) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            user_id: user_id,
+            user_id: getUserId(),
             track_id: songDetails.track_id
         })
     })
@@ -241,7 +262,7 @@ function removeSongFromList(button, listType) {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-                    user_id: user_id,
+                    user_id: getUserId(),
                     track_id: songItem.querySelector('.track-id').textContent
                 })
     })

@@ -11,6 +11,12 @@ git push heroku main
 heroku open -a music-application
 ```
 
+### Run Heroku local as debug:
+````
+heroku config:set DEBUG=True
+heroku local web
+````
+
 ### Installation for Devs:
 ````
 brew install poetry

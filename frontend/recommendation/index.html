@@ -21,10 +21,13 @@
                 Upload CSV <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
             </label>
         </div>
+        <div id="loader-overlay" class="loader-overlay hidden">
+            <div class="loader"></div>
+        </div>
         <div class="list-container">
             <div id="likedSongsContainer" class="list-group-container">
                 <h2>Favorites</h2>
-                <div id="likedLoader" class="loader"></div>
+                <div id="likedLoader" class="loader-lst"></div>
                 <div id="likedSongsList" class="list-group">
                     <!-- Dynamically added liked songs will appear here -->
                 </div>
@@ -32,14 +35,14 @@
             <div id="recommendedSongsContainer" class="list-group-container emphasized">
                 <h2>Suggestions for You</h2>
                 <button id="refreshButton" class="btn btn-refresh" onclick="refreshRecommendedSongs()">Refresh</button>
-                <div id="recommendationsLoader" class="loader"></div>
+                <div id="recommendationsLoader" class="loader-lst"></div>
                 <div id="recommendedSongsList" class="list-group">
                     <!-- Dynamically added recommended songs will appear here -->
                 </div>
             </div>
             <div id="dislikedSongsContainer" class="list-group-container">
                 <h2>Not for Me</h2>
-                <div id="dislikedLoader" class="loader"></div>
+                <div id="dislikedLoader" class="loader-lst"></div>
                 <div id="dislikedSongsList" class="list-group">
                     <!-- Dynamically added disliked songs will appear here -->
                 </div>
