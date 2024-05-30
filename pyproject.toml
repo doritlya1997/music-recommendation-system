@@ -19,6 +19,7 @@ setuptools = "^69.5.1"
 pyarrow = "^16.1.0"
 fastparquet = "^2024.5.0"
 werkzeug = "^3.0.3"
+pinecone-client = "^4.1.0"
 
 [tool.poetry.dev-dependencies]
 pyspark = "3.5.1"
