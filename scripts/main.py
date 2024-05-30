@@ -626,18 +626,18 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_API_KEY="248cf0f2-be45-4f5e-9854-67884f601c89"
 
 
-@contextmanager
-def get_pinecone_conn():
-    # Initialize Pinecone connection
-    pc = Pinecone(api_key=PINECONE_API_KEY)
-    conn = pc.Index('tracks')
-    try:
-        yield conn
-    except Exception as e:
-        print(e)
-    finally:
-        # Explicitly delete the connection object
-        del conn
+# @contextmanager
+# def get_pinecone_conn():
+#     # Initialize Pinecone connection
+#     pc = Pinecone(api_key=PINECONE_API_KEY)
+#     conn = pc.Index('tracks')
+#     try:
+#         yield conn
+#     except Exception as e:
+#         print(e)
+#     finally:
+#         # Explicitly delete the connection object
+#         del conn
 
 
 def get_tracks_df(user_id: int, type: str):
@@ -779,7 +779,7 @@ if __name__ == "__main__":
     # spark = config_spark()
     print("hello")
     # preprocess(spark)
-    get_recommendations_pinecone()
+    # get_recommendations_pinecone()
     print("end")
     # get_recommandations()
 
