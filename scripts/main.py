@@ -472,7 +472,8 @@ def get_db(DATABASE_URL):
     finally:
         conn.close()
 
-def query_db(query) -> pandas.DataFrame:
+
+def query_db(query, return_early=False) -> pandas.DataFrame:
     DATABASE_URL="postgres://ghiabcwcxsyfvo:9de383d33fe38cec6d6bb1f41fa313df2f054cc6091bd08cb018f02e74c0cdd7@ec2-34-252-152-193.eu-west-1.compute.amazonaws.com:5432/d9mck4patkc46n"
 
     with get_db(DATABASE_URL) as conn:
@@ -486,6 +487,8 @@ def query_db(query) -> pandas.DataFrame:
             # The execute returns a list of tuples:
             tuples_list = cur.fetchall()
             cur.close()
+            if return_early:
+                return tuples_list
 
             columns = [
                 "track_id",
@@ -614,41 +617,53 @@ def get_recommandations(user_id=2):
     print("top_similarities")
     display(top_similarities)
 
+######################################
 
 
-def sandbox():
-    cols_for_similarity = [
-        "acousticness",
-        "danceability",
-        "energy",
-        "genre_acoustic",
-        "genre_hip-hop",
-        "genre_indie",
-        "genre_piano",
-        "genre_pop",
-        "genre_rock",
-        "instrumentalness",
-        "liveness",
-        "loudness",
-        "mode",
-        "popularity",
-        "speechiness",
-        "tempo",
-        "track_id",
-        "valence",
-        "year_2000-2004",
-        "year_2005-2009",
-        "year_2010-2014",
-        "year_2015-2019",
-        "year_2020-2023"
-    ]
+from pinecone import Pinecone, ServerlessSpec
 
-    all_cols = [
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_API_KEY="248cf0f2-be45-4f5e-9854-67884f601c89"
+
+
+@contextmanager
+def get_pinecone_conn():
+    # Initialize Pinecone connection
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    conn = pc.Index('tracks')
+    try:
+        yield conn
+    except Exception as e:
+        print(e)
+    finally:
+        # Explicitly delete the connection object
+        del conn
+
+
+def get_tracks_df(user_id: int, type: str):
+    tuples_list = []
+    if type == "like":
+        tuples_list = query_db(f"""
+            SELECT tracks.*, update_timestamp
+            FROM likes
+            JOIN tracks ON likes.track_id = tracks.track_id
+            WHERE likes.user_id = {user_id};
+            """)
+    else:
+        tuples_list = query_db(f"""
+            SELECT tracks.*, update_timestamp
+            FROM dislikes
+            JOIN tracks ON dislikes.track_id = tracks.track_id
+            WHERE dislikes.user_id = {user_id};
+            """)
+
+    columns = [
         "track_id",
         "id",
         "artist_name",
         "track_name",
         "popularity",
+        "year",
         "genre",
         "danceability",
         "energy",
@@ -671,15 +686,100 @@ def sandbox():
         "update_timestamp"
     ]
 
-    difference = sorted(list(set(all_cols) - set(cols_for_similarity)))
+    # transform the list into a pandas DataFrame
+    df = pd.DataFrame(tuples_list, columns=columns)
+    display(df)
+    return df
 
-    print(difference)
+
+def get_tracks_by_id_score(top_tracks):
+    """
+    SELECT track_id, track_name, artist_name, relevance_percentage, year
+    FROM tracks
+    JOIN (  SELECT track_id_col, relevance_percentage
+            FROM (
+                VALUES ('3IfBNSetM8bgPObhggD3Yq', 0.99),
+                       ('1MYaHGczevRznjDOf90Gfp', 0.88)
+            ) AS derived_table(track_id_col, relevance_percentage)) as recommended
+    ON tracks.track_id = recommended.track_id_col;
+    """
+    values_clause = ", ".join([f"('{track_id}', {relevance_percentage})" for track_id, relevance_percentage in top_tracks])
+    query = f"""
+        SELECT track_id, track_name, artist_name, relevance_percentage, year
+        FROM tracks
+        JOIN (
+            SELECT track_id_col, relevance_percentage
+            FROM (
+                VALUES {values_clause}
+            ) AS derived_table(track_id_col, relevance_percentage)
+        ) AS recommended
+        ON tracks.track_id = recommended.track_id_col;"""
+    print(query)
+
+    result = query_db(query, return_early=True)
+    print(result)
+    return result
+
+
+def get_recommendations_pinecone(user_id=7):
+
+    cols_for_similarity = ["acousticness", "danceability", "energy", "instrumentalness", "liveness", "loudness", "mode",
+                       "popularity", "speechiness", "tempo", "valence",
+                       "year_2000_2004", "year_2005_2009", "year_2010_2014", "year_2015_2019", "year_2020_2024",
+                       "update_timestamp"]
+    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
+
+    user_likes_playlist = get_tracks_df(user_id, type="like")
+    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
+
+    if len(user_likes_playlist) == 0:
+        return []
+
+    user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
+    user_likes_other_cols_df = user_likes_playlist[other_cols]
+    # display(user_likes_similarity_df)
+
+    column_averages = weighted_mean(user_likes_similarity_df).tolist()
+    # user_likes_similarity_df_mean = pd.DataFrame([column_averages], index=['Average'])
+    # display(column_averages)
+
+    top_ids_scores = []
+    with get_pinecone_conn() as conn:
+        # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
+        query_result = conn.query(vector=column_averages, top_k=70)
+        top_ids_scores = [(match['id'], match['score']) for match in query_result['matches']]
+        # print(top_ids)
+        print(top_ids_scores)
+
+    # Delete already liked, and disliked tracks
+    likes_track_ids = user_likes_playlist['track_id'].tolist()
+    dislikes_track_ids = user_dislikes_playlist['track_id'].tolist()
+
+    top_ids_scores = [(t_id, t_score)
+                      for t_id, t_score in top_ids_scores
+                      if t_id not in likes_track_ids and t_id not in dislikes_track_ids]
+    print(top_ids_scores)
+
+    if len(top_ids_scores) > 0:
+        result = get_tracks_by_id_score(top_ids_scores)
+
+    # tracks_df = pd.concat(map(partial(pd.read_parquet),
+    #                           glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
+    # tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
+    # tracks_other_cols_df = tracks_df[other_cols]
+    # tracks_similarity_df = tracks_similarity_df.sort_index(axis=1)
+    # user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
+    #
+    # similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
+    # tracks_similarity_df['relevance_percentage'] = similarity_scores
+    # tracks_similarity_df['relevance_percentage'] = tracks_similarity_df['relevance_percentage'].mul(100).round(1)
 
 
 if __name__ == "__main__":
-    spark = config_spark()
+    # spark = config_spark()
     print("hello")
-    preprocess(spark)
+    # preprocess(spark)
+    get_recommendations_pinecone()
     print("end")
     # get_recommandations()
 
