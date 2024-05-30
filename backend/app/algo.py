@@ -1,6 +1,6 @@
 from functools import partial
 
-from IPython.display import display
+# from IPython.display import display
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import pandas as pd
@@ -97,7 +97,7 @@ def get_tracks_df(user_id: int, type: str):
 
     # transform the list into a pandas DataFrame
     df = pd.DataFrame(tuples_list, columns=columns)
-    display(df)
+    # display(df)
     return df
 
 
@@ -160,7 +160,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
                               glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
     tracks_other_cols_df = tracks_df[other_cols]
-    display(tracks_df)
+    # display(tracks_df)
 
     user_likes_playlist = get_tracks_df(user_id, type="like")
     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
@@ -185,8 +185,8 @@ def get_recommendations_by_user_listening_history(user_id: int):
     # Reset indexes to ensure uniqueness
     tracks_similarity_df = tracks_similarity_df.reset_index(drop=True)
     tracks_other_cols_df = tracks_other_cols_df.reset_index(drop=True)
-    display(tracks_similarity_df)
-    display(tracks_other_cols_df)
+    # display(tracks_similarity_df)
+    # display(tracks_other_cols_df)
     scored_tracks_df = pd.concat([tracks_similarity_df, tracks_other_cols_df], axis=1, join='inner')
 
     # remove tracks which are already liked/disliked
@@ -198,7 +198,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
     top_similarities = top_similarities.head(10)
 
     top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
-    display(top_similarities)
+    # display(top_similarities)
 
     lod = top_similarities.to_dict('records')
     return lod
