@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
     registerForm.addEventListener('submit', async function(event) {
         event.preventDefault();
         const username = document.getElementById('registerUsername').value;

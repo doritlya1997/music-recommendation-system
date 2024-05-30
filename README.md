@@ -1,5 +1,8 @@
 # music-recommendation-system
 
+### Link to the web-app
+https://music-application-e6959040ee86.herokuapp.com/
+
 ### Heroku commands for Deployment
 ```
 heroku login
@@ -57,6 +60,10 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
 - Run `scripts/pine/create_index.py`
 - Then `scripts/pine/insert.py`
 
+### Connect to the remote heroku bash:
+````
+heroku run bash --app music-application
+````
 
 ### Production logs monitoring
 ````
