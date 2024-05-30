@@ -15,7 +15,6 @@ poetry config virtualenvs.in-project true
 poetry install
 brew tap heroku/brew && brew install heroku
 
-
 heroku login
 heroku create music-recommendation-system
 ````
@@ -33,11 +32,7 @@ poetry lock
 poetry install
 ````
 
-### Production logs monitoring
-````
-heroku logs --tail --app  music-application
-````
-### Data Preparation and loading into PostgreSQL DB
+### Data Preparation and loading into PostgreSQL Database
 To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need to:
 
 - Download the dataset from the link (https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------)
@@ -49,13 +44,21 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
   DB_HOST = "..."
   DB_PORT = "..."
   DB_NAME = "..."
+  PINECONE_API_KEY = "..."
   ```
 - Run `preprocess(spark)` in `scripts/main.py`
+  - It will take the `scripts/data/spotify_data.csv` and produce these folders by order:
+  - `scripts/dup_track_id.csv/`
+  - `scripts/data_no_duplicates.csv/`
+  - `scripts/data_ready_for_db.csv/`
+- Then spark will load the `scripts/data_ready_for_db.csv/` dataset into PostreSQL `tracks` table
+
+### Loading Tracks data into pinecone Vector Database
+- Run `scripts/pine/create_index.py`
+- Then `scripts/pine/insert.py`
 
 
-It will take the `scripts/data/spotify_data.csv` and produce these folders by order:
-
-- `scripts/dup_track_id.csv/`
-- `scripts/data_no_duplicates.csv/`
-- `scripts/data_ready_for_db.csv/`
-- Then spark will load the `scripts/data_ready_for_db.csv/` dataset into PostreSQL
+### Production logs monitoring
+````
+heroku logs --tail --app  music-application
+````
