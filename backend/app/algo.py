@@ -83,25 +83,9 @@ def weighted_mean(df, col="update_timestamp"):
 
 
 def get_recommendations_by_user_listening_history(user_id: int):
-    cols_for_similarity = [
-        "acousticness",
-        "danceability",
-        "energy",
-        "instrumentalness",
-        "liveness",
-        "loudness",
-        "mode",
-        "popularity",
-        "speechiness",
-        "tempo",
-        "valence",
-        "year_2000_2004",
-        "year_2005_2009",
-        "year_2010_2014",
-        "year_2015_2019",
-        "year_2020_2024",
-        "update_timestamp"
-    ]
+    cols_for_similarity = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence',
+                           'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024',
+                           'update_timestamp']
     other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
 
     print("CURRENT PATH:")
