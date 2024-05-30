@@ -11,19 +11,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 
 
-def load_ENV_VAR():
-    load_dotenv()
-
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-
-    print(f"DATABASE_URL={DATABASE_URL}")
-    print(f"PINECONE_API_KEY={PINECONE_API_KEY}")
-
-
 @contextmanager
 def get_db():
-    load_ENV_VAR()
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     try:
         yield conn
@@ -35,7 +24,6 @@ def get_db():
 
 @contextmanager
 def get_pinecone_conn():
-    load_ENV_VAR()
     pc = Pinecone(api_key=PINECONE_API_KEY)
     conn = pc.Index('tracks')
     try:

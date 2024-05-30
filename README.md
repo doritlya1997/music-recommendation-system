@@ -3,14 +3,6 @@
 ### Link to the web-app
 https://music-application-e6959040ee86.herokuapp.com/
 
-### Heroku commands for Deployment
-```
-heroku login
-heroku git:remote -a music-application
-git push heroku main
-heroku open -a music-application
-```
-
 ### Installation for Devs:
 ````
 brew install poetry
@@ -42,12 +34,8 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
 - Place the dataset here: `scripts/data/spotify_data.csv`
 - Add a `scripts/secrets1.py` file with your database credentials:
   ```
-  DB_USER = "..."
-  DB_PASSWORD = "..."
-  DB_HOST = "..."
-  DB_PORT = "..."
-  DB_NAME = "..."
-  PINECONE_API_KEY = "..."
+  DATABASE_URL=postgres://... 
+  PINECONE_API_KEY=...
   ```
 - Run `preprocess(spark)` in `scripts/main.py`
   - It will take the `scripts/data/spotify_data.csv` and produce these folders by order:
@@ -60,12 +48,28 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
 - Run `scripts/pine/create_index.py`
 - Then `scripts/pine/insert.py`
 
-### Connect to the remote heroku bash:
+### Heroku commands for Deployment
+#### Just once before the first deployment
+```
+heroku login
+heroku git:remote -a music-application
+heroku config:set DATABASE_URL=postgres://... --app music-application
+heroku config:set PINECONE_API_KEY=... --app music-application
+```
+You'll see the newly set Environment Variables in the Heroku UI > Settings > Config Vars.
+#### When you want to Deploy
+```
+heroku login
+git push heroku main
+heroku open -a music-application
+```
+### Monitoring
+#### Connect to the remote heroku bash:
 ````
 heroku run bash --app music-application
 ````
 
-### Production logs monitoring
+#### Production logs monitoring
 ````
 heroku logs --tail --app  music-application
 ````
