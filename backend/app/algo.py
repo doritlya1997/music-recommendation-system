@@ -6,7 +6,7 @@ from psycopg2.extras import RealDictCursor
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import glob
-
+import os
 from backend.app import crud
 from backend.app.database import get_db
 
@@ -66,12 +66,13 @@ def get_tracks_df(user_id: int, type: str):
     else:
         tuples_list = crud.get_disliked_tracks(user_id)
 
-    columns = [ # TODO: delete irrelevant
+    columns = [
         "track_id",
         "id",
         "artist_name",
         "track_name",
         "popularity",
+        "year",
         "genre",
         "danceability",
         "energy",
@@ -103,14 +104,14 @@ def get_tracks_df(user_id: int, type: str):
 def weighted_mean(df, col="update_timestamp"):
     # print(df.dtypes)
     date_col = df[col]
-    quantiles_values = date_col.quantile([0, 0.25, 0.5, 0.75, 1], interpolation="nearest")
+    quantiles_values = date_col.quantile([0.25, 0.5, 0.75], interpolation="nearest")
     print(quantiles_values)
 
-    min_date = df.at[0.00, col]
-    max_date = df.at[1.00, col]
+    min_date = df.min()
+    max_date = df.max()
 
-    # if short period of tim
-    if (max_date - min_date).days < 7:
+    # check if short period of tim
+    if (max_date['update_timestamp'] - min_date['update_timestamp']).days < 7:
         mean_df = df.mean().drop(col)
     else:
         # calculate each quantile mean and multiply be matching weight
@@ -150,16 +151,22 @@ def get_recommendations_by_user_listening_history(user_id: int):
         "year_2020_2024",
         "update_timestamp"
     ]
-    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'time_signature', 'track_id', 'track_name']
+    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
+
+    print("CURRENT PATH:")
+    print(os.getcwd())
 
     tracks_df = pd.concat(map(partial(pd.read_parquet),
-                              glob.glob("scripts/data_ready_for_db_parquet/*.parquet")))
+                              glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
     tracks_other_cols_df = tracks_df[other_cols]
     display(tracks_df)
 
     user_likes_playlist = get_tracks_df(user_id, type="like")
     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
+
+    if len(user_likes_playlist) == 0:
+        return []
 
     user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
     user_likes_other_cols_df = user_likes_playlist[other_cols]
@@ -172,10 +179,10 @@ def get_recommendations_by_user_listening_history(user_id: int):
     user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
 
     similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
-    tracks_similarity_df['similarity_score'] = similarity_scores
+    tracks_similarity_df['relevance_percentage'] = similarity_scores
+    tracks_similarity_df['relevance_percentage'] = tracks_similarity_df['relevance_percentage'].mul(100).round(1)
 
-    # TODO: join `tracks_other_cols_df` back
-    # Reset indices to ensure uniqueness
+    # Reset indexes to ensure uniqueness
     tracks_similarity_df = tracks_similarity_df.reset_index(drop=True)
     tracks_other_cols_df = tracks_other_cols_df.reset_index(drop=True)
     display(tracks_similarity_df)
@@ -183,16 +190,16 @@ def get_recommendations_by_user_listening_history(user_id: int):
     scored_tracks_df = pd.concat([tracks_similarity_df, tracks_other_cols_df], axis=1, join='inner')
 
     # remove tracks which are already liked/disliked
-    top_similarities = scored_tracks_df.sort_values(by='similarity_score', ascending=False)
+    top_similarities = scored_tracks_df.sort_values(by='relevance_percentage', ascending=False)
     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_likes_playlist['track_id'])]
-    top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
+
+    if len(user_dislikes_playlist) > 0:
+        top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
     top_similarities = top_similarities.head(10)
 
-    # TODO fix year, and select top_similarities['year']
-    top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'similarity_score', 'year_2020_2024']]
-    top_similarities = top_similarities.rename(columns={'year_2020_2024': 'year', 'similarity_score': 'relevance_percentage'})
-
+    top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
     display(top_similarities)
 
     lod = top_similarities.to_dict('records')
     return lod
+

@@ -11,6 +11,7 @@ function getUserName() {
 
 document.getElementById('logoutBtn').addEventListener('click', function() {
             localStorage.removeItem(CACHE_USER_ID_KEY);
+            localStorage.removeItem(CACHE_USER_NAME_KEY);
             window.location.href = '/';
         });
 
@@ -34,30 +35,60 @@ function processCSVData(csvData) {
     }
     var headers = dataLines[0].split(',');
     var rows = dataLines.slice(1);
-    
+
+    track_id_list = []
+    error_occurred = null
     rows.forEach(row => {
-        var columns = row.split(',');
-        if (columns.length === headers.length) {
-            console.log(columns);  // Replace this with actual processing or display logic
-        } else {
-            console.error('Row does not match header length:', row);
+        if (!error_occurred) {
+            var columns = row.split(',');
+            if (columns.length === headers.length) {
+                track_id_list.push(columns[0]);
+            } else {
+                alert('CSV Row does not match header length:', row);
+                error_occurred = true
+            }
         }
     });
+
+
+     if (!error_occurred) {
+        fetch('/like/csv', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: getUserId(),
+                track_ids: track_id_list
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.affected_rows > 0)
+                alert(data.affected_rows + " " + data.message)
+            else
+                alert(data.message)
+            console.log('Songs liked:', data);
+            refreshLikedSongs();
+        })
+        .catch(error => console.error('Error:', error));
+
+        document.getElementById('songInput').value = ''; // Clear input field
+
+     }
 }
 
+
+// Add single track from input using spotify_link and track_id
 function addSong() {
     var song_input = document.getElementById('songInput').value.trim();
+    if (!song_input) {
+        alert('Please enter a Spotify song link or upload a CSV file.');
+        return
+    }
+
     track_id = extractTrackId(song_input)
-
-//    if track_id {
-//        // link
-//    }
-//    else {
-//        // track_name = song_input
-//        // IGNORE
-//    }
-
-    if (songInput) {
+    if (track_id) {
         fetch('/like', {
             method: 'POST',
             headers: {
@@ -70,23 +101,33 @@ function addSong() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            if (data.affected_rows > 0)
+                alert(data.affected_rows + " " + data.message)
+            else
+                alert(data.message)
+            console.log('Song liked:', data);
             refreshLikedSongs();
         })
         .catch(error => console.error('Error:', error));
 
-        document.getElementById('songInput').value = ''; // Clear input field
+        document.getElementById('songInput').value = '';
     } else {
-        alert('Please enter a song link or upload a CSV file.');
+        alert('This is not a Spotify song link.');
     }
 }
 
-function generateSongHTML({ track_id, track_name, artist_name, year, link }, actions) {
+function generateSongHTML({ track_id, track_name, artist_name, year, relevance_percentage }, actions) {
+    let percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
+    let link = 'https://open.spotify.com/track/' +  track_id
+
     return `
         <div class="list-group-item">
             <div class="item-details">
                 <span class="track-id hidden">${track_id}</span>
-                <span class="track-name">${track_name}</span>
+                <div class="track-name-container">
+                    <span class="track-name">${track_name}</span>
+                    ${percentage_element}
+                </div>
                 <span class="artist-name">${artist_name}</span>
                 <span class="year">(${year})</span>
                 <a href="${link}" target="_blank" class="listen-link">Listen on Spotify</a>
@@ -98,16 +139,17 @@ function generateSongHTML({ track_id, track_name, artist_name, year, link }, act
     `;
 }
 
-function appendSongToLiked(songDetails) {
+function appendSongToLiked(songDetails, where) {
     var likedSongsList = document.getElementById('likedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
-    likedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+
+    likedSongsList.innerHTML = generateSongHTML(songDetails, actions) + likedSongsList.innerHTML;
 }
 
 function appendSongToDisliked(songDetails) {
     var dislikedSongsList = document.getElementById('dislikedSongsList');
     var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'dislike')"><i class="fa fa-trash"></i> Remove</button>`;
-    dislikedSongsList.innerHTML += generateSongHTML(songDetails, actions);
+    dislikedSongsList.innerHTML = generateSongHTML(songDetails, actions) + dislikedSongsList.innerHTML;
 }
 
 function appendSongToRecommendations(songDetails) {
@@ -131,7 +173,7 @@ function likeSong(button) {
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-        link: songItem.querySelector('.listen-link').href
+//        link: songItem.querySelector('.listen-link').href
     };
 
     appendSongToLiked(songDetails);
@@ -151,7 +193,7 @@ function likeSong(button) {
     .then(response => response.json())
     .then(data => {
         console.log('Song liked:', data);
-        refreshLikedSongs()
+        refreshLikedSongs();
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -162,10 +204,10 @@ function dislikeSong(button) {
     var songItem = button.parentNode.parentNode;
     var songDetails = {
         track_id: songItem.querySelector('.track-id').textContent,
-        song: songItem.querySelector('.track-name').textContent,
-        artist: songItem.querySelector('.artist-name').textContent,
+        track_name: songItem.querySelector('.track-name').textContent,
+        artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-        link: songItem.querySelector('.listen-link').href
+//        link: songItem.querySelector('.listen-link').href
     };
     appendSongToDisliked(songDetails);
     songItem.remove();
@@ -184,6 +226,7 @@ function dislikeSong(button) {
     .then(response => response.json())
     .then(data => {
         console.log('Song disliked:', data);
+        refreshDislikedSongs();
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -199,7 +242,7 @@ function removeSongFromList(button, listType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
                     user_id: user_id,
-                    track_id: songItem.querySelector('.track_id').textContent
+                    track_id: songItem.querySelector('.track-id').textContent
                 })
     })
     .then(response => response.json())
@@ -212,11 +255,14 @@ function removeSongFromList(button, listType) {
 function refreshLikedSongs() {
     var user_id = getUserId()
 
+    var likedSongsList = document.getElementById('likedSongsList');
+    likedSongsList.innerHTML = ''; // Clear the list
+    $("#likedLoader").removeClass("hidden");
+
     fetch("/like/" + user_id)
     .then(response => response.json())
     .then(data => {
-        var likedSongsList = document.getElementById('likedSongsList');
-        likedSongsList.innerHTML = ''; // Clear the list
+        $("#likedLoader").addClass("hidden");
         data.forEach(song => appendSongToLiked(song));
     })
     .catch(error => console.error('Error:', error));
@@ -225,11 +271,14 @@ function refreshLikedSongs() {
 function refreshDislikedSongs() {
     var user_id = getUserId()
 
+    var dislikedSongsList = document.getElementById('dislikedSongsList');
+    dislikedSongsList.innerHTML = ''; // Clear the list
+    $("#dislikedLoader").removeClass("hidden");
+
     fetch("/dislike/" + user_id)
     .then(response => response.json())
     .then(data => {
-        var dislikedSongsList = document.getElementById('dislikedSongsList');
-        dislikedSongsList.innerHTML = ''; // Clear the list
+        $("#dislikedLoader").addClass("hidden");
         data.forEach(song => appendSongToDisliked(song));
     })
     .catch(error => console.error('Error:', error));
@@ -248,7 +297,10 @@ function refreshRecommendedSongs() {
         $("#recommendationsLoader").addClass("hidden");
         data.forEach(song => appendSongToRecommendations(song));
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        $("#recommendationsLoader").addClass("hidden");
+        console.error('Error:', error);
+    })
 }
 
 // Check if user is logged in
@@ -257,11 +309,11 @@ if (!user_id) {
     window.location.href = '/';
 };
 
-
 function refreshScreen() {
     var user_id = getUserId()
     var user_name = getUserName()
     if (user_id) {
+        $("#username").text(user_name)
         refreshLikedSongs()
         refreshDislikedSongs()
         refreshRecommendedSongs()

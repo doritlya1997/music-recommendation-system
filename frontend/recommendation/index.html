@@ -15,7 +15,7 @@
             <button id="logoutBtn" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">Logout</button>
         </div>
         <div class="input-component text-center">
-            <input type="text" class="form-control input-sm" id="songInput" placeholder="Add your favorite (by link / CSV upload)">
+            <input type="text" class="form-control input-sm" id="songInput" placeholder="Add your favorite tracks by Spotify link / Upload a CSV of Spotify tracks ids">
             <button class="btn btn-add btn-custom" onclick="addSong()">Add</button>
             <label class="btn btn-upload btn-custom btn-file">
                 Upload CSV <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
@@ -24,9 +24,9 @@
         <div class="list-container">
             <div id="likedSongsContainer" class="list-group-container">
                 <h2>Favorites</h2>
+                <div id="likedLoader" class="loader"></div>
                 <div id="likedSongsList" class="list-group">
                     <!-- Dynamically added liked songs will appear here -->
-                    <div class="loader"></div>
                 </div>
             </div>
             <div id="recommendedSongsContainer" class="list-group-container emphasized">
@@ -39,9 +39,9 @@
             </div>
             <div id="dislikedSongsContainer" class="list-group-container">
                 <h2>Not for Me</h2>
+                <div id="dislikedLoader" class="loader"></div>
                 <div id="dislikedSongsList" class="list-group">
                     <!-- Dynamically added disliked songs will appear here -->
-                    <div class="loader"></div>
                 </div>
             </div>
         </div>

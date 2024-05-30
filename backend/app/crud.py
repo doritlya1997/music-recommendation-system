@@ -28,12 +28,12 @@ def get_likes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT t.track_id, t.track_name, t.artist_name, 0 as year, concat('https://open.spotify.com/track/', t.track_id) as link
+                SELECT t.track_id, t.track_name, t.artist_name, year
                 FROM likes l
                 JOIN users u ON l.user_id = u.id
                 JOIN tracks t ON l.track_id = t.track_id
                 WHERE u.id = %s
-                ORDER BY l.update_timestamp DESC;
+                ORDER BY l.update_timestamp ASC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks
@@ -56,12 +56,12 @@ def get_dislikes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT t.track_id, t.track_name, t.artist_name, 0 as year, concat('https://open.spotify.com/track/', t.track_id) as link
+                SELECT t.track_id, t.track_name, t.artist_name, year
                 FROM dislikes d
                 JOIN users u ON d.user_id = u.id
                 JOIN tracks t ON d.track_id = t.track_id
                 WHERE u.id = %s
-                ORDER BY d.update_timestamp DESC;
+                ORDER BY d.update_timestamp ASC;
             """, (user_id,))
             tracks = cur.fetchall()
             return tracks
@@ -80,20 +80,24 @@ def get_disliked_tracks(user_id: int):
             return tracks
 
 
-def upload_csv(username: str, track_ids: list):
+def upload_csv(user_id: int, track_ids: list):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE username = %s;", (username,))
+            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
             if not user:
                 return False
-            user_id = user['id']
+
+            affected_rows = 0
             for track_id in track_ids:
                 cur.execute("""
-                    INSERT INTO likes (user_id, track_id) VALUES (%s, %s);
-                """, (user_id, track_id))
+                    INSERT INTO likes (user_id, track_id) 
+                    VALUES (%s, %s)
+                    ON CONFLICT (user_id, track_id) DO NOTHING;
+                    """, (user_id, track_id))
+                affected_rows += cur.rowcount
             conn.commit()
-            return True
+            return affected_rows
 
 
 def add_like(user_id: int, track_id: str):
@@ -103,9 +107,14 @@ def add_like(user_id: int, track_id: str):
             user = cur.fetchone()
             if not user:
                 return False
-            cur.execute("""INSERT INTO likes (user_id, track_id) VALUES (%s, %s);""", (user_id, track_id))
+            cur.execute("""
+                INSERT INTO likes (user_id, track_id) 
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, track_id) DO NOTHING;
+                """, (user_id, track_id))
             conn.commit()
-            return True
+            affected_rows = cur.rowcount
+            return affected_rows
 
 
 def add_dislike(user_id: int, track_id: str):
@@ -115,7 +124,11 @@ def add_dislike(user_id: int, track_id: str):
             user = cur.fetchone()
             if not user:
                 return False
-            cur.execute("""INSERT INTO dislikes (user_id, track_id) VALUES (%s, %s);""", (user_id, track_id))
+            cur.execute("""
+                INSERT INTO dislikes (user_id, track_id) 
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, track_id) DO NOTHING;
+                """, (user_id, track_id))
             conn.commit()
             return True
 
@@ -142,15 +155,3 @@ def remove_dislike(user_id: int, track_id: str):
             cur.execute("""DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
             return True
-
-
-def get_recommendations():
-    with get_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT track_id, track_name, artist_name, year, relevance_percentage
-                FROM tracks
-                ORDER BY relevance_percentage DESC;
-            """)
-            tracks = cur.fetchall()
-            return tracks
