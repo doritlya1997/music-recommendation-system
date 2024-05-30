@@ -8,55 +8,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
-from backend.app.database import get_db
-
-# def query_db(query, columns) -> pandas.DataFrame:
-#     DATABASE_URL="postgres://ghiabcwcxsyfvo:9de383d33fe38cec6d6bb1f41fa313df2f054cc6091bd08cb018f02e74c0cdd7@ec2-34-252-152-193.eu-west-1.compute.amazonaws.com:5432/d9mck4patkc46n"
-#
-#     with get_db(DATABASE_URL) as conn:
-#         with conn.cursor() as cur:
-#             try:
-#                 cur.execute(query)
-#             except (Exception, psycopg2.DatabaseError) as error:
-#                 print("Error: %s" % error)
-#                 cur.close()
-#                 return 1
-#             # The execute returns a list of tuples:
-#             tuples_list = cur.fetchall()
-#             cur.close()
-#
-#             columns = [
-#                 "track_id",
-#                 "id",
-#                 "artist_name",
-#                 "track_name",
-#                 "popularity",
-#                 "genre",
-#                 "danceability",
-#                 "energy",
-#                 "key",
-#                 "loudness",
-#                 "mode",
-#                 "speechiness",
-#                 "acousticness",
-#                 "instrumentalness",
-#                 "liveness",
-#                 "valence",
-#                 "tempo",
-#                 "duration_ms",
-#                 "time_signature",
-#                 "year_2000_2004",
-#                 "year_2005_2009",
-#                 "year_2010_2014",
-#                 "year_2015_2019",
-#                 "year_2020_2024",
-#                 "update_timestamp"
-#             ]
-#
-#             # Now we need to transform the list into a pandas DataFrame:
-#             df = pd.DataFrame(tuples_list, columns=columns)
-#             display(df)
-#             return df
 
 
 def get_tracks_df(user_id: int, type: str):
