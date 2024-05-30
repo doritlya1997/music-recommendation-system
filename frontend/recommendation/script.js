@@ -203,7 +203,6 @@ function likeSong(button) {
         .then(response => response.json())
         .then(data => {
             if (data.affected_rows > 0) {
-                alert(data.affected_rows + " " + data.message)
                 console.log('Song liked:', data);
                 appendSongToLiked(songDetails);
                 refreshLikedSongs();
@@ -215,8 +214,6 @@ function likeSong(button) {
         .catch(error => {
             console.error('Error:', error);
         });
-
-        document.getElementById('songInput').value = '';
     } else {
         alert('This is not a Spotify song link.');
     }
