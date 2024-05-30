@@ -169,3 +169,4 @@ def get_recommendations_by_user_listening_history(user_id: int):
         result = get_tracks_by_id_and_score(top_ids_scores)
         return result
     return []
+
