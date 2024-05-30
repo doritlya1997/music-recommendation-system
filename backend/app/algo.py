@@ -87,9 +87,6 @@ def get_recommendations_by_user_listening_history(user_id: int):
                            'update_timestamp']
     other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
 
-    print("CURRENT PATH:")
-    print(os.getcwd())
-
     tracks_df = pd.concat(map(partial(pd.read_parquet),
                               glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
