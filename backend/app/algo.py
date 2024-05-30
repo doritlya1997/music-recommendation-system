@@ -8,6 +8,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
+from backend.app.crud import get_tracks_by_id_and_score
+from backend.app.pinecone_crud import query_pinecone
 
 
 def get_tracks_df(user_id: int, type: str):
@@ -81,7 +83,7 @@ def weighted_mean(df, col="update_timestamp"):
     return mean_df
 
 
-def get_recommendations_by_user_listening_history(user_id: int):
+def get_recommendations_by_user_listening_history_files(user_id: int):
     cols_for_similarity = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence',
                            'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024',
                            'update_timestamp']
@@ -129,3 +131,41 @@ def get_recommendations_by_user_listening_history(user_id: int):
     lod = top_similarities.to_dict('records')
     return lod
 
+
+def get_recommendations_by_user_listening_history(user_id: int):
+
+    cols_for_similarity = ["acousticness", "danceability", "energy", "instrumentalness", "liveness", "loudness", "mode",
+                           "popularity", "speechiness", "tempo", "valence",
+                           "year_2000_2004", "year_2005_2009", "year_2010_2014", "year_2015_2019", "year_2020_2024",
+                           "update_timestamp"]
+    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
+
+    user_likes_playlist = get_tracks_df(user_id, type="like")
+    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
+
+    if len(user_likes_playlist) == 0:
+        return []
+
+    user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
+    column_averages = weighted_mean(user_likes_similarity_df).tolist()
+
+    top_k_recommendations = 2 * (len(user_likes_playlist) + len(user_dislikes_playlist))
+    print(f"Getting top {top_k_recommendations} vectors from pinecone")
+
+    # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
+    query_result = query_pinecone(column_averages, top_k_recommendations)
+    top_ids_scores = [(match['id'], match['score']) for match in query_result['matches']]
+
+    # Excluding already liked and disliked tracks from top similar tracks list
+    likes_track_ids = user_likes_playlist['track_id'].tolist()
+    dislikes_track_ids = user_dislikes_playlist['track_id'].tolist()
+    top_ids_scores = [(t_id, t_score)
+                      for t_id, t_score in top_ids_scores
+                      if t_id not in likes_track_ids and t_id not in dislikes_track_ids]
+    print(f"After excluding already liked, and disliked tracks, Got {len(top_ids_scores)} recommended tracks")
+
+    # Get tracks information by 'track_id', and add the similarity 'score' pinecone calculated
+    if len(top_ids_scores) > 0:
+        result = get_tracks_by_id_and_score(top_ids_scores)
+        return result
+    return []

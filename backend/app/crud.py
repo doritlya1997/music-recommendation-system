@@ -23,7 +23,7 @@ def authenticate_user(username: str):
             user = cur.fetchone()
             return user
 
-# TODO: reprocess the data and produce simple 'year' column
+
 def get_likes(user_id: int):
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -155,3 +155,27 @@ def remove_dislike(user_id: int, track_id: str):
             cur.execute("""DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
             return True
+
+
+# Recommendations
+
+
+def get_tracks_by_id_and_score(top_tracks: list[tuple]):
+    values_clause = ", ".join([f"('{track_id}', {relevance_percentage})" for track_id, relevance_percentage in top_tracks])
+    query = f"""
+        SELECT track_id, track_name, artist_name, relevance_percentage, year
+        FROM tracks
+        JOIN (
+            SELECT track_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
+            FROM (
+                VALUES {values_clause}
+            ) AS derived_table(track_id_col, relevance_percentage)
+        ) AS recommended
+        ON tracks.track_id = recommended.track_id_col;"""
+    print(query)
+
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            tracks = cur.fetchall()
+            return tracks
