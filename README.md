@@ -33,6 +33,11 @@ poetry lock
 poetry install
 ````
 
+### Connect to the remote heroku bash:
+````
+heroku run bash --app music-application
+````
+
 ### Production logs monitoring
 ````
 heroku logs --tail --app  music-application
