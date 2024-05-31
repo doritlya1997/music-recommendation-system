@@ -1,24 +1,7 @@
 # music-recommendation-system
 
-### Link to the web-app
+## Link to the web-app
 https://music-application-e6959040ee86.herokuapp.com/
-
-### Heroku commands for Deployment
-```
-heroku login
-heroku git:remote -a music-application
-git push heroku main
-heroku open -a music-application
-```
-### Run project locally
-```
-uvicorn backend.app:app --host 0.0.0.0 --port 8080 
-```
-### Run Heroku local as debug:
-````
-heroku config:set DEBUG=True
-heroku local web
-````
 
 ### Installation for Devs:
 ````
@@ -44,10 +27,14 @@ poetry lock
 poetry install
 ````
 
-### Data Preparation and loading into PostgreSQL Database
+
+### Creating tables into PostgresSQL Database
+- Open `pgAdmin`/`Data Grip`/ whatever tool you use, and run the scripts in: `scripts/RDS_scripts/create_table_scripts.sql`
+
+### Tracks Data Preparation and Loading into PostgreSQL Database
 To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need to:
 
-- Download the dataset from the link (https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------)
+- Download the dataset from the [kaggle.com/Spotify_1Million_Tracks](https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------)
 - Place the dataset here: `scripts/data/spotify_data.csv`
 - Add a `scripts/secrets1.py` file with your database credentials:
   ```
@@ -61,9 +48,22 @@ To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need 
   - `scripts/data_ready_for_db.csv/`
 - Then spark will load the `scripts/data_ready_for_db.csv/` dataset into PostreSQL `tracks` table
 
-### Loading Tracks data into pinecone Vector Database
+### Creating and Loading Tracks data into Pinecone Vector Database
 - Run `scripts/pine/create_index.py`
 - Then `scripts/pine/insert.py`
+
+
+### Run project locally
+Like this:
+```
+uvicorn backend.app:app --host 0.0.0.0 --port 8080 
+```
+or like this:
+````
+heroku config:set DEBUG=True
+heroku local web
+````
+
 
 ### Heroku commands for Deployment
 #### Just once before the first deployment
@@ -75,8 +75,11 @@ heroku config:set PINECONE_API_KEY=... --app music-application
 ```
 You'll see the newly set Environment Variables in the Heroku UI > Settings > Config Vars.
 #### When you want to Deploy
+Either go to the UI, to Deploy Tab > Manual deploy > Choose a branch to deploy > main > `Deploy Branch` button.
+Or run this in your local machine:
 ```
 heroku login
+heroku git:remote -a music-application
 git push heroku main
 heroku open -a music-application
 ```
