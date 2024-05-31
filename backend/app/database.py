@@ -13,6 +13,7 @@ DATABASE_URL="postgres://ghiabcwcxsyfvo:9de383d33fe38cec6d6bb1f41fa313df2f054cc6
 PINECONE_API_KEY="248cf0f2-be45-4f5e-9854-67884f601c89"
 
 
+
 @contextmanager
 def get_db():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
