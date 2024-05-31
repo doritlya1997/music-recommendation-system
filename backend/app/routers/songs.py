@@ -83,7 +83,8 @@ def remove_dislike(request: UserTrackRequest):
 
 @router.get("/recommendation/{user_id}", response_model=List[Track])
 def get_recommendations(user_id: int):
-    return algo.get_recommendations_by_user_listening_history(user_id)
+    # return algo.get_recommendations_by_user_listening_history(user_id)
+    return algo.get_recommendations_by_similar_users(user_id)
 
 # TODO: recommendation by user listening history
 # TODO: recommendation by similar user - top tracks

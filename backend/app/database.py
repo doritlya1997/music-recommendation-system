@@ -23,9 +23,9 @@ def get_db():
 
 
 @contextmanager
-def get_pinecone_conn():
+def get_pinecone_index(index_name):
     pc = Pinecone(api_key=PINECONE_API_KEY)
-    conn = pc.Index('tracks')
+    conn = pc.Index(index_name)
     try:
         yield conn
     except Exception as e:

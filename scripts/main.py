@@ -818,13 +818,6 @@ def get_recommendations__listening_history(user_id=7):
 
 
 def get_recommendations_by_similar_users(user_id=32):
-    pass
-    # get user like and dislikes
-    user_likes_playlist = get_tracks_df(user_id, type="like")
-    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
-    # if len(user_likes_playlist) == 0:
-    #     return []
-
     top_ids_scores = []
     with get_pinecone_conn('users') as users_index:
         # get user vector from pinecone
@@ -832,7 +825,7 @@ def get_recommendations_by_similar_users(user_id=32):
         user_record = retrieve_user_results.get('vectors').get(str(user_id))
 
         if not user_record:
-            return []
+            return [] # user has no likes or dislikes
         user_vector = user_record['values']
         print(f"user_vector: {user_vector}")
 
@@ -848,8 +841,6 @@ def get_recommendations_by_similar_users(user_id=32):
     result = get_likes_by_user_id_score(top_ids_scores, user_id)
     print(len(result))
     return result
-    # get user liked tracks - how? TBD
-    # filter out like and dislikes of current user
 
 if __name__ == "__main__":
     # spark = config_spark()

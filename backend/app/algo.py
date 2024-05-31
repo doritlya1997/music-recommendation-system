@@ -8,8 +8,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
-from backend.app.crud import get_tracks_by_id_and_score
-from backend.app.pinecone_crud import query_pinecone_by_vector
+from backend.app.crud import get_tracks_by_id_and_score, get_tracks_by_top_similar_users
+from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids
 
 
 def get_tracks_df(user_id: int, type: str):
@@ -173,3 +173,26 @@ def get_recommendations_by_user_listening_history(user_id: int):
         return result
     return []
 
+
+def get_recommendations_by_similar_users(user_id: int):
+    retrieve_user_results = query_pinecone_by_ids('users', [str(user_id)])
+    user_record = retrieve_user_results.get('vectors').get(str(user_id))
+
+    if not user_record:
+        return [] # user has no likes or dislikes
+    user_vector = user_record.get('values')
+    print(f"user_vector: {user_vector}")
+
+    # get similar user from pinecone, take top k user_id
+    # Query Pinecone 'users' index, using 'cosine' metric, to find the top most similar vectors
+    query_user_results = query_pinecone_by_vector('users', user_vector, top_k=20)
+    top_ids_scores = [(match.get('id'), match.get('score')) for match in query_user_results.get('matches')]
+    print(f"top_ids_scores: {top_ids_scores}")
+
+    if not len(top_ids_scores):
+        return []
+
+    result = get_tracks_by_top_similar_users(top_ids_scores, user_id)
+    print(len(result))
+    return result
+    # TODO: randomize the results
