@@ -167,18 +167,30 @@ def remove_dislike(user_id: int, track_id: str):
 # Recommendations
 
 
-def get_tracks_by_id_and_score(top_tracks: list[tuple]):
+def get_recommended_tracks_by_user_listening_history(top_tracks: list[tuple], user_id: int):
     values_clause = ", ".join([f"('{track_id}', {relevance_percentage})" for track_id, relevance_percentage in top_tracks])
     query = f"""
-        SELECT track_id, track_name, artist_name, relevance_percentage, year
-        FROM tracks
-        JOIN (
+        WITH
+        current_user_likes_dislikes AS (
+            SELECT likes.track_id
+            FROM likes
+            WHERE user_id = {user_id}
+            UNION
+            SELECT dislikes.track_id
+            FROM dislikes
+            WHERE user_id = {user_id}
+        )
+        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year
+        FROM (
             SELECT track_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
             FROM (
                 VALUES {values_clause}
             ) AS derived_table(track_id_col, relevance_percentage)
-        ) AS recommended
-        ON tracks.track_id = recommended.track_id_col;"""
+        ) AS top_tracks
+        JOIN tracks ON top_tracks.track_id_col = tracks.track_id
+        LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
+        WHERE current_user_likes_dislikes.track_id IS NULL;
+    """
     # print(query)
 
     with get_db() as conn:
@@ -188,7 +200,7 @@ def get_tracks_by_id_and_score(top_tracks: list[tuple]):
             return tracks
 
 
-def get_tracks_by_top_similar_users(top_users, user_id):
+def get_recommended_tracks_by_top_similar_users(top_users, user_id):
     values_clause = ", ".join([f"(CAST('{track_id}' AS INT), {relevance_percentage})" for track_id, relevance_percentage in top_users])
     query = f"""
         WITH

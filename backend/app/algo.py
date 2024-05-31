@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
-from backend.app.crud import get_tracks_by_id_and_score, get_tracks_by_top_similar_users
+from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users
 from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids
 
 
@@ -151,25 +151,16 @@ def get_recommendations_by_user_listening_history(user_id: int):
     column_averages = weighted_mean(user_likes_similarity_df).tolist()
     # TODO: until here
 
-    top_k_recommendations = 2 * (len(user_likes_playlist) + len(user_dislikes_playlist))
+    top_k_recommendations = max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
     print(f"Getting top {top_k_recommendations} vectors from pinecone")
 
     # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
     query_result = query_pinecone_by_vector('tracks', column_averages, top_k_recommendations)
     top_ids_scores = [(match['id'], match['score']) for match in query_result['matches']]
 
-    # Excluding already liked and disliked tracks from top similar tracks list
-    # TODO: do this in DB!!!
-    likes_track_ids = user_likes_playlist['track_id'].tolist()
-    dislikes_track_ids = user_dislikes_playlist['track_id'].tolist()
-    top_ids_scores = [(t_id, t_score)
-                      for t_id, t_score in top_ids_scores
-                      if t_id not in likes_track_ids and t_id not in dislikes_track_ids]
-    print(f"After excluding already liked, and disliked tracks, Got {len(top_ids_scores)} recommended tracks")
-
     # Get tracks information by 'track_id', and add the similarity 'score' pinecone calculated
     if len(top_ids_scores) > 0:
-        result = get_tracks_by_id_and_score(top_ids_scores)
+        result = get_recommended_tracks_by_user_listening_history(top_ids_scores, user_id)
         return result
     return []
 
@@ -192,7 +183,7 @@ def get_recommendations_by_similar_users(user_id: int):
     if not len(top_ids_scores):
         return []
 
-    result = get_tracks_by_top_similar_users(top_ids_scores, user_id)
+    result = get_recommended_tracks_by_top_similar_users(top_ids_scores, user_id)
     print(len(result))
     return result
     # TODO: randomize the results
