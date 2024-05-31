@@ -1,3 +1,5 @@
+from typing import Optional
+
 from .database import get_db
 
 
@@ -31,7 +33,7 @@ def user_added_track_report(user_id: int, track_id: str) -> None:
             conn.commit()
 
 
-def user_liked_recommended_track_report(user_id: int, track_id: str, recommendation_type: str) -> None:
+def user_liked_recommended_track_report(user_id: int, track_id: str, recommendation_type: Optional[str] = None) -> None:
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""

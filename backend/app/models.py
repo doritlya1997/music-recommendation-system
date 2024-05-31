@@ -20,8 +20,8 @@ class UserTrackRequest(BaseModel):
     user_id: int
     user_name: str
     track_id: str
-    is_add_by_user: Optional[bool]
-    recommendation_type: Optional[str]
+    is_add_by_user: Optional[bool] = None
+    recommendation_type: Optional[str] = None
 
 
 class CSVUploadRequest(BaseModel):

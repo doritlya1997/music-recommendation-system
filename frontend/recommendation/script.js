@@ -45,7 +45,8 @@ function processCSVData(csvData) {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_ids: track_id_list
+                track_ids: track_id_list,
+                is_add_by_user: true
             })
         })
         .then(response => {
@@ -255,8 +256,9 @@ function dislikeSong(button) {
         body: JSON.stringify({
             user_id: getUserId(),
             user_name: getUserName(),
-            track_id: songDetails.track_id
-            // TODO: track_source: songItem.querySelector('.track-source-text').textContent
+            track_id: songDetails.track_id,
+            is_add_by_user: false,
+            recommendation_type: songItem.querySelector('.track-source-text').textContent
         })
     })
     .then(response => {

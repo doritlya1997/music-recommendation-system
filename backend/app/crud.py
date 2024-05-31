@@ -1,3 +1,4 @@
+from . import stats_reporter_crud
 from .database import get_db
 
 
@@ -102,7 +103,7 @@ def add_like(user_id: int, track_id: str):
             # Check if the track_id exists in the dislikes table for the user
             cur.execute("""
                 SELECT 1 FROM tracks WHERE track_id = %s;
-            """, (track_id))
+            """, (track_id,))
             is_track_exists = cur.fetchone()
             if not is_track_exists:
                 return False, "The requested track is not exists in our limited 1M dataset."
@@ -126,6 +127,7 @@ def upload_csv(user_id: int, track_ids: list):
     for track_id in track_ids:
         if add_like(user_id, track_id)[0]:
             affected_rows += 1
+            stats_reporter_crud.user_liked_recommended_track_report(user_id, track_id)
     return affected_rows
 
 
