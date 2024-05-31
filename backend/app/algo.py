@@ -141,7 +141,7 @@ def get_recommendations_by_user_listening_history(user_id: int):
     user_vector = user_record.get('values')
     print(f"user_vector: {user_vector}")
 
-
+    # TODO: add len(user_likes_playlist) + len(user_dislikes_playlist) as METADATA to DB
     top_k_recommendations = 50# max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
     print(f"Getting top {top_k_recommendations} vectors from pinecone")
 
