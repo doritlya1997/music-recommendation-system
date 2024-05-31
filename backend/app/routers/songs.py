@@ -1,6 +1,8 @@
 from typing import List
 
 from fastapi import HTTPException, APIRouter
+from .. import crud, algo
+from ..algo import update_user_mean_vector
 from .. import crud, algo, stats_reporter_crud
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
@@ -63,6 +65,7 @@ def upload_csv(request: CSVUploadRequest):
     if affected_rows == 0:
         return {"status": "200", "message": "All liked tracks already exist", "affected_rows": affected_rows}
     else:
+        update_user_mean_vector(request.user_id)
         return {"status": "200", "message": "Likes were added successfully", "affected_rows": affected_rows}
 
 
@@ -73,6 +76,7 @@ def add_like_route(request: UserTrackRequest):
 
     success, message = crud.add_like(request.user_id, request.track_id)
     if success:
+        update_user_mean_vector(request.user_id)
         if request.is_add_by_user:
             stats_reporter_crud.user_added_track_report(request.user_id, request.track_id)
         else:
@@ -98,6 +102,7 @@ def remove_like(request: UserTrackRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     crud.remove_like(request.user_id, request.track_id)
+    update_user_mean_vector(request.user_id)
     return {"status": "200"}
 
 
@@ -115,8 +120,8 @@ def get_recommendations(user_id: int, user_name: str):
     if not crud.user_exists(user_id, user_name):
         raise HTTPException(status_code=404, detail="User not found")
 
-    return algo.get_recommendations_by_user_listening_history(user_id)
+    # return algo.get_recommendations_by_user_listening_history(user_id)
+    # return algo.get_recommendations_by_similar_users(user_id)
+    return algo.get_combined_recommendation(user_id)
 
-# TODO: recommendation by user listening history
-# TODO: recommendation by similar user - top tracks
-# TODO: recommendation by favorite artists - get data from spotify. update db and parquet files.
+# TODO: recommendation by favorite artists - get data from spotify. update db and vector db.

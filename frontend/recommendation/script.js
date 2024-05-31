@@ -93,7 +93,8 @@ function addSong() {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_id: track_id
+                track_id: track_id,
+                is_add_by_user: true
             })
         })
         .then(response => {
@@ -122,19 +123,35 @@ function addSong() {
     }
 }
 
-function generateSongHTML({ track_id, track_name, artist_name, year, relevance_percentage }, actions) {
+function generateSongHTML({ track_id, track_name, artist_name, year, relevance_percentage, recommendation_type }, actions) {
     let percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
     let link = 'https://open.spotify.com/track/' + track_id;
+    let source_element = ""
 
+    if (recommendation_type) {
+        dict = {
+            "user_history": { icon: "gg-girl", desc: "User Similarity" },
+            "similar_users": { icon: "gg-music", desc: "Track Similarity" },
+        }
+
+        source_element = `<span class='track-source'>
+                            <i class='${dict[recommendation_type].icon}'></i>
+                            <span class="tooltip">${dict[recommendation_type].desc}</span>
+                        </span>`
+    }
     return `
         <div class="list-group-item">
             <div class="item-details">
                 <span class="track-id hidden">${track_id}</span>
+                <span class="track-source-text hidden">${recommendation_type}</span>
                 <div class="track-name-container">
                     <span class="track-name">${track_name}</span>
                     ${percentage_element}
                 </div>
-                <span class="artist-name">${artist_name}</span>
+                <div class="track-name-container">
+                    <span class="artist-name">${artist_name}</span>
+                    ${source_element}
+                </div>
                 <span class="year">(${year})</span>
                 <a href="${link}" target="_blank" class="listen-link">Listen on Spotify</a>
             </div>
@@ -178,7 +195,7 @@ function likeSong(button) {
         track_id: songItem.querySelector('.track-id').textContent,
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
-        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
+        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', '')
     };
 
     if (songDetails.track_id) {
@@ -190,7 +207,9 @@ function likeSong(button) {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_id: songDetails.track_id
+                track_id: songDetails.track_id,
+                is_add_by_user: false,
+                recommendation_type: songItem.querySelector('.track-source-text').textContent
             })
         })
         .then(response => {
@@ -223,7 +242,7 @@ function dislikeSong(button) {
         track_id: songItem.querySelector('.track-id').textContent,
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
-        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
+        year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', '')
     };
     appendSongToDisliked(songDetails);
     songItem.remove();
@@ -238,6 +257,7 @@ function dislikeSong(button) {
             user_id: getUserId(),
             user_name: getUserName(),
             track_id: songDetails.track_id
+            // TODO: track_source: songItem.querySelector('.track-source-text').textContent
         })
     })
     .then(response => {
@@ -265,6 +285,7 @@ function removeSongFromList(button, listType) {
             user_id: getUserId(),
             user_name: getUserName(),
             track_id: songItem.querySelector('.track-id').textContent
+            // TODO: track_source: songItem.querySelector('.track-source-text').textContent
         })
     })
     .then(response => {

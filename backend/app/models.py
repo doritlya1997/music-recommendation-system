@@ -13,6 +13,7 @@ class Track(BaseModel):
     artist_name: str
     year: int
     relevance_percentage: float
+    recommendation_type: str
 
 
 class UserTrackRequest(BaseModel):

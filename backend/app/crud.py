@@ -99,6 +99,14 @@ def add_like(user_id: int, track_id: str):
             if disliked:
                 return False, "Track is in dislikes, cannot add to likes."
 
+            # Check if the track_id exists in the dislikes table for the user
+            cur.execute("""
+                SELECT 1 FROM tracks WHERE track_id = %s;
+            """, (track_id))
+            is_track_exists = cur.fetchone()
+            if not is_track_exists:
+                return False, "The requested track is not exists in our limited 1M dataset."
+
             # Insert into likes if not in dislikes
             cur.execute("""
                 INSERT INTO likes (user_id, track_id) 
@@ -146,18 +154,61 @@ def remove_dislike(user_id: int, track_id: str):
             conn.commit()
 
 
-def get_tracks_by_id_and_score(top_tracks: list[tuple]):
+def get_recommended_tracks_by_user_listening_history(top_tracks: list[tuple], user_id: int):
     values_clause = ", ".join([f"('{track_id}', {relevance_percentage})" for track_id, relevance_percentage in top_tracks])
     query = f"""
-        SELECT track_id, track_name, artist_name, relevance_percentage, year
-        FROM tracks
-        JOIN (
+        WITH
+        current_user_likes_dislikes AS (
+            SELECT likes.track_id
+            FROM likes
+            WHERE user_id = {user_id}
+            UNION
+            SELECT dislikes.track_id
+            FROM dislikes
+            WHERE user_id = {user_id}
+        )
+        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year, 'user_history' as recommendation_type
+        FROM (
             SELECT track_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
             FROM (
                 VALUES {values_clause}
             ) AS derived_table(track_id_col, relevance_percentage)
-        ) AS recommended
-        ON tracks.track_id = recommended.track_id_col;"""
+        ) AS top_tracks
+        JOIN tracks ON top_tracks.track_id_col = tracks.track_id
+        LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
+        WHERE current_user_likes_dislikes.track_id IS NULL;
+    """
+
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            tracks = cur.fetchall()
+            return tracks
+
+
+def get_recommended_tracks_by_top_similar_users(top_users, user_id):
+    values_clause = ", ".join([f"(CAST('{track_id}' AS INT), {relevance_percentage})" for track_id, relevance_percentage in top_users])
+    query = f"""
+        WITH
+        current_user_likes_dislikes AS (
+            SELECT likes.track_id, likes.user_id
+            FROM likes
+            WHERE user_id = {user_id}
+            UNION
+            SELECT dislikes.track_id, dislikes.user_id
+            FROM dislikes
+            WHERE user_id = {user_id}
+        )
+        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year, 'similar_users' as recommendation_type
+        FROM (  SELECT user_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
+                FROM (
+                VALUES {values_clause}
+                    ) AS derived_table(user_id_col, relevance_percentage)) as top_users
+        JOIN likes ON top_users.user_id_col = likes.user_id
+        JOIN tracks ON likes.track_id = tracks.track_id
+        LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
+        WHERE current_user_likes_dislikes.track_id IS NULL;
+        """
 
     with get_db() as conn:
         with conn.cursor() as cur:
