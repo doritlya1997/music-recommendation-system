@@ -133,29 +133,20 @@ def weighted_mean(df, col="update_timestamp"):
 
 
 def get_recommendations_by_user_listening_history(user_id: int):
+    retrieve_user_results = query_pinecone_by_ids('users', [str(user_id)])
+    user_record = retrieve_user_results.get('vectors').get(str(user_id))
 
-    # TODO: change this code to retrieve user mean vector from DB
-    cols_for_similarity = ["acousticness", "danceability", "energy", "instrumentalness", "liveness", "loudness", "mode",
-                           "popularity", "speechiness", "tempo", "valence",
-                           "year_2000_2004", "year_2005_2009", "year_2010_2014", "year_2015_2019", "year_2020_2024",
-                           "update_timestamp"]
-    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
+    if not user_record:
+        return []  # user has no likes or dislikes, can't recommend
+    user_vector = user_record.get('values')
+    print(f"user_vector: {user_vector}")
 
-    user_likes_playlist = get_tracks_df(user_id, type="like")
-    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
 
-    if len(user_likes_playlist) == 0:
-        return []
-
-    user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
-    column_averages = weighted_mean(user_likes_similarity_df).tolist()
-    # TODO: until here
-
-    top_k_recommendations = max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
+    top_k_recommendations = 50# max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
     print(f"Getting top {top_k_recommendations} vectors from pinecone")
 
     # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
-    query_result = query_pinecone_by_vector('tracks', column_averages, top_k_recommendations)
+    query_result = query_pinecone_by_vector('tracks', user_vector, top_k_recommendations)
     top_ids_scores = [(match['id'], match['score']) for match in query_result['matches']]
 
     # Get tracks information by 'track_id', and add the similarity 'score' pinecone calculated
@@ -170,7 +161,7 @@ def get_recommendations_by_similar_users(user_id: int):
     user_record = retrieve_user_results.get('vectors').get(str(user_id))
 
     if not user_record:
-        return [] # user has no likes or dislikes
+        return []  # user has no likes or dislikes, can't recommend
     user_vector = user_record.get('values')
     print(f"user_vector: {user_vector}")
 
