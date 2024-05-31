@@ -1,5 +1,7 @@
 CACHE_USER_ID_KEY = 'user_id';
 CACHE_USER_NAME_KEY = 'user_name';
+recommendation_list_size = 0;
+user_like_or_dis_clicks_count = 0
 
 function getUserId() {
     let id = localStorage.getItem(CACHE_USER_ID_KEY);
@@ -45,7 +47,8 @@ function processCSVData(csvData) {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_ids: track_id_list
+                track_ids: track_id_list,
+                is_add_by_user: true
             })
         })
         .then(response => {
@@ -93,7 +96,8 @@ function addSong() {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_id: track_id
+                track_id: track_id,
+                is_add_by_user: true
             })
         })
         .then(response => {
@@ -207,8 +211,9 @@ function likeSong(button) {
             body: JSON.stringify({
                 user_id: getUserId(),
                 user_name: getUserName(),
-                track_id: songDetails.track_id
-                // TODO: track_source: songItem.querySelector('.track-source-text').textContent
+                track_id: songDetails.track_id,
+                is_add_by_user: false,
+                recommendation_type: songItem.querySelector('.track-source-text').textContent
             })
         })
         .then(response => {
@@ -219,6 +224,7 @@ function likeSong(button) {
         })
         .then(data => {
             if (data.affected_rows > 0) {
+                handle_counter()
                 console.log('Song liked:', data);
             } else {
                 alert(data.message);
@@ -253,8 +259,9 @@ function dislikeSong(button) {
         body: JSON.stringify({
             user_id: getUserId(),
             user_name: getUserName(),
-            track_id: songDetails.track_id
-            // TODO: track_source: songItem.querySelector('.track-source-text').textContent
+            track_id: songDetails.track_id,
+            is_add_by_user: false,
+            recommendation_type: songItem.querySelector('.track-source-text').textContent
         })
     })
     .then(response => {
@@ -264,11 +271,19 @@ function dislikeSong(button) {
         return response.json();
     })
     .then(data => {
+        handle_counter();
         console.log('Song disliked:', data);
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
     });
+}
+
+function handle_counter() {
+    user_like_or_dis_clicks_count = user_like_or_dis_clicks_count + 1
+    if (user_like_or_dis_clicks_count == recommendation_list_size) {
+        refreshRecommendedSongs()
+    }
 }
 
 function removeSongFromList(button, listType) {
@@ -304,7 +319,6 @@ function refreshLikedSongs() {
     let likedSongsList = document.getElementById('likedSongsList');
     likedSongsList.innerHTML = ''; // Clear the list
     $("#likedLoader").removeClass("hidden");
-
     fetch(`/like/?user_id=${user_id}&user_name=${user_name}`)
     .then(response => {
         if (response.status === 404) {
@@ -345,7 +359,7 @@ function refreshDislikedSongs() {
     .catch(error => console.error('Error:', error));
 }
 
-function refreshRecommendedSongs() {
+function refreshRecommendedSongs(is_from_button= false) {
     let user_id = getUserId();
     let user_name = getUserName();
 
@@ -353,7 +367,8 @@ function refreshRecommendedSongs() {
     recommendedSongsList.innerHTML = ''; // Clear the list
     $("#recommendationsLoader").removeClass("hidden");
 
-    fetch(`/recommendation/?user_id=${user_id}&user_name=${user_name}`)
+    is_user_ignored_recommendations = (user_like_or_dis_clicks_count === 0)
+    fetch(`/recommendation/?user_id=${user_id}&user_name=${user_name}&is_from_button=${is_from_button}&is_user_ignored_recommendations=${is_user_ignored_recommendations}`)
     .then(response => {
         if (response.status === 404) {
             handleUnauthorizedUser();
@@ -363,6 +378,7 @@ function refreshRecommendedSongs() {
     .then(data => {
         $("#recommendationsLoader").addClass("hidden");
         if (data.length > 0) {
+            recommendation_list_size = data.length
             data.forEach(song => appendSongToRecommendations(song));
         }
     })
