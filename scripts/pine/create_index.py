@@ -16,6 +16,16 @@ def preprocess():
         )
     )
 
+    pc.create_index(
+        name="users",
+        dimension=16,
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1"
+        )
+    )
+
 
 if __name__ == "__main__":
     preprocess()

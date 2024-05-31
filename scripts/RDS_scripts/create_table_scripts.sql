@@ -1,54 +1,55 @@
-DROP TABLE tracks;
-
--- TODO: update according to db current state
-CREATE TABLE tracks (
-    track_id VARCHAR PRIMARY KEY,
-    id INTEGER,
-    artist_name VARCHAR,
-    track_name VARCHAR,
-    popularity DOUBLE PRECISION,
-    genre VARCHAR,
-    danceability DOUBLE PRECISION,
-    energy DOUBLE PRECISION,
-    key INTEGER,
-    loudness DOUBLE PRECISION,
-    mode INTEGER,
-    speechiness DOUBLE PRECISION,
-    acousticness DOUBLE PRECISION,
-    instrumentalness DOUBLE PRECISION,
-    liveness DOUBLE PRECISION,
-    valence DOUBLE PRECISION,
-    tempo DOUBLE PRECISION,
-    duration_ms VARCHAR,
-    time_signature VARCHAR,
-    year_2000_2004 INTEGER,
-    year_2005_2009 INTEGER,
-    year_2010_2014 INTEGER,
-    year_2015_2019 INTEGER,
-    year_2020_2024 INTEGER
+create table public.tracks
+(
+    track_id         varchar not null constraint tracks_pkey1 primary key,
+    id               integer,
+    artist_name      varchar,
+    track_name       varchar,
+    popularity       double precision,
+    year             integer,
+    genre            varchar,
+    danceability     double precision,
+    energy           double precision,
+    key              integer,
+    loudness         double precision,
+    mode             integer,
+    speechiness      double precision,
+    acousticness     double precision,
+    instrumentalness double precision,
+    liveness         double precision,
+    valence          double precision,
+    tempo            double precision,
+    duration_ms      varchar,
+    time_signature   varchar,
+    year_2000_2004   integer,
+    year_2005_2009   integer,
+    year_2010_2014   integer,
+    year_2015_2019   integer,
+    year_2020_2024   integer
 );
 
--- Create users table
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    hashed_password VARCHAR(255) NOT NULL
+create table public.users
+(
+    id              serial primary key,
+    username        varchar(255) not null unique constraint unique_username_user unique,
+    hashed_password varchar(255) not null
 );
 
--- Create likes table
-CREATE TABLE likes (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    track_id VARCHAR(255) NOT NULL
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
---     FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
+create table public.likes
+(
+    id               serial primary key,
+    user_id          integer                 not null,
+    track_id         varchar(255)            not null,
+    update_timestamp timestamp default now() not null,
+    constraint unique_user_likes unique (user_id, track_id)
 );
 
--- Create dislikes table
-CREATE TABLE dislikes (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    track_id VARCHAR(255) NOT NULL
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
---     FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
+create table public.dislikes
+(
+    id               serial primary key,
+    user_id          integer                 not null,
+    track_id         varchar(255)            not null,
+    update_timestamp timestamp default now() not null,
+    constraint unique_user_dislikes unique (user_id, track_id)
 );
+
+
