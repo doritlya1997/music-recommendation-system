@@ -68,6 +68,6 @@ def user_ignored_recommendations_report(user_id: int) -> None:
         with conn.cursor() as cur:
             cur.execute("""
                             INSERT INTO user_events (user_id, event_id) 
-                            VALUES (%s, %s, %s, %s);
+                            VALUES (%s, %s);
                         """, (user_id, 7))
             conn.commit()
