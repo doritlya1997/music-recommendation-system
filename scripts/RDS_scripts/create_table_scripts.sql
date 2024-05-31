@@ -52,4 +52,29 @@ create table public.dislikes
     constraint unique_user_dislikes unique (user_id, track_id)
 );
 
+-- stats tables
+
+-- Creating the User Events Definitions Table
+CREATE TABLE events_definitions (
+    event_id INT PRIMARY KEY,
+    event_name VARCHAR(255) NOT NULL
+);
+
+-- Creating the User Events Table
+CREATE TABLE user_events (
+    user_id INT NOT NULL,
+    event_id INT NOT NULL,
+    track_id VARCHAR(255) DEFAULT NULL,
+    recommendation_type VARCHAR(255) DEFAULT NULL
+);
+
+-- Inserting event definitions
+INSERT INTO events_definitions (event_id, event_name) VALUES
+(1, 'user_signed_up'),
+(2, 'user_logged_in'),
+(3, 'user_added_track'),
+(4, 'user_liked_recommended_track'),
+(5, 'user_disliked_recommended_track'),
+(6, 'user_requested_recommendations'),
+(7, 'user_ignored_recommendations');
 

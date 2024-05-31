@@ -329,7 +329,6 @@ function refreshLikedSongs() {
     .then(data => {
         $("#likedLoader").addClass("hidden");
         if (data.length > 0) {
-            recommendation_list_size = data.length
             data.forEach(song => appendSongToLiked(song));
         }
     })
@@ -379,6 +378,7 @@ function refreshRecommendedSongs(is_from_button= false) {
     .then(data => {
         $("#recommendationsLoader").addClass("hidden");
         if (data.length > 0) {
+            recommendation_list_size = data.length
             data.forEach(song => appendSongToRecommendations(song));
         }
     })
