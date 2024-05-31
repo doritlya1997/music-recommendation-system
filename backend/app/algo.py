@@ -1,13 +1,4 @@
-from functools import partial
-
-# from IPython.display import display
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
-import glob
-import os
-from backend.app import crud
 from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users, get_liked_tracks
 from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone
 import random
@@ -144,7 +135,7 @@ def get_combined_recommendation(user_id: int):
     if not combined:
         return []
 
-    # TODO: define numbers in Config Vars, also previous functions
+    # TODO: change to configvar
     sample_size = min(len(user_history), len(similar_users))
     shuffled_list = random.sample(combined, sample_size)
     return shuffled_list

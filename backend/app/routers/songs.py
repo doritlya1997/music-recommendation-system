@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import HTTPException, APIRouter
 from .. import crud, algo
 from ..algo import update_user_mean_vector
@@ -113,4 +112,4 @@ def get_recommendations(user_id: int, user_name: str):
     # return algo.get_recommendations_by_similar_users(user_id)
     return algo.get_combined_recommendation(user_id)
 
-# TODO: recommendation by favorite artists - get data from spotify. update db and vector db.
+# TODO: recommendation by favorite artists - get data from spotify. update postgres db and vector db.

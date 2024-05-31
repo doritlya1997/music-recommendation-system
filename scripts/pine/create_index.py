@@ -8,8 +8,8 @@ def preprocess():
 
     pc.create_index(
         name="tracks",
-        dimension=16, # Replace with your model dimensions
-        metric="cosine", # Replace with your model metric
+        dimension=16,
+        metric="cosine",
         spec=ServerlessSpec(
             cloud="aws",
             region="us-east-1"

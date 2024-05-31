@@ -1,20 +1,10 @@
-# from backend.app.database import get_pinecone_conn
 from contextlib import contextmanager
-
-import pandas
-from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 from tempfile import TemporaryDirectory
 from pyspark.sql import SparkSession
-from pyspark.sql import types
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-from pyspark.sql import window
-from pyspark.sql import functions as F
-import pandas as pd
-from pyspark.ml.feature import MinMaxScaler, VectorAssembler
-from pyspark.ml.functions import vector_to_array
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import Pinecone
 
 PINECONE_API_KEY = "248cf0f2-be45-4f5e-9854-67884f601c89"
 
