@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import HTTPException, APIRouter
-from .. import crud, algo
+from .. import crud, algo, stats_reporter_crud
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
@@ -15,6 +15,8 @@ def register(user: User):
     dbuser = crud.create_user(user.username, hashed_password)
     if not dbuser:
         raise HTTPException(status_code=400, detail="Username already exists")
+
+    stats_reporter_crud.sign_up_report(dbuser['user_id'])
     return {'user_id': dbuser['user_id'],
             'user_name': dbuser['user_name']}
 
@@ -24,6 +26,8 @@ def login(user: User):
     dbuser = crud.authenticate_user(user.username)
     if not dbuser or not verify_password(user.password, dbuser['hashed_password']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    stats_reporter_crud.user_logged_in_report(dbuser['user_id'])
     return {'user_id': dbuser['user_id'],
             'user_name': dbuser['user_name']}
 
@@ -69,6 +73,10 @@ def add_like_route(request: UserTrackRequest):
 
     success, message = crud.add_like(request.user_id, request.track_id)
     if success:
+        if request.is_add_by_user:
+            stats_reporter_crud.user_added_track_report(request.user_id, request.track_id)
+        else:
+            stats_reporter_crud.user_liked_recommended_track_report(request.user_id, request.track_id, request.recommendation_type)
         return {"status": "200", "message": message, "affected_rows": 1}
     else:
         return {"status": "200", "message": message, "affected_rows": 0}
@@ -80,6 +88,7 @@ def add_dislike(request: UserTrackRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     crud.add_dislike(request.user_id, request.track_id)
+    stats_reporter_crud.user_disliked_recommended_track_report(request.user_id, request.track_id, request.recommendation_type)
     return {"status": "200"}
 
 
