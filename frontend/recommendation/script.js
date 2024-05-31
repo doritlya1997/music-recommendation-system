@@ -1,53 +1,36 @@
-CACHE_USER_ID_KEY = 'user_id'
-CACHE_USER_NAME_KEY = 'user_name'
+CACHE_USER_ID_KEY = 'user_id';
+CACHE_USER_NAME_KEY = 'user_name';
 
 function getUserId() {
-    id = localStorage.getItem(CACHE_USER_ID_KEY)
-    return id ? Number(id) : null
+    let id = localStorage.getItem(CACHE_USER_ID_KEY);
+    return id ? Number(id) : null;
 }
+
 function getUserName() {
-    return localStorage.getItem(CACHE_USER_NAME_KEY)
+    return localStorage.getItem(CACHE_USER_NAME_KEY);
 }
-
-document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem(CACHE_USER_ID_KEY);
-            localStorage.removeItem(CACHE_USER_NAME_KEY);
-            window.location.href = '/';
-        });
-
-document.getElementById('csvFileInput').addEventListener('change', function(event) {
-    var file = event.target.files[0];
-    var reader = new FileReader();
-    
-    reader.onload = function(event) {
-        var csvData = event.target.result;
-        processCSVData(csvData);
-    };
-
-    reader.readAsText(file);
-});
 
 function processCSVData(csvData) {
     document.getElementById('loader-overlay').classList.remove('hidden'); // Show loader overlay
 
-    var dataLines = csvData.split(/\r\n|\n/);
+    let dataLines = csvData.split(/\r\n|\n/);
     if (dataLines.length <= 1) {
         alert('The CSV file is empty or improperly formatted.');
         document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
         return;
     }
-    var headers = dataLines[0].split(',');
-    var rows = dataLines.slice(1);
+    let headers = dataLines[0].split(',');
+    let rows = dataLines.slice(1);
 
-    track_id_list = []
-    error_occurred = null
+    let track_id_list = [];
+    let error_occurred = null;
     rows.forEach(row => {
         if (!error_occurred) {
-            var columns = row.split(',');
+            let columns = row.split(',');
             if (columns.length === headers.length) {
                 track_id_list.push(extractTrackId(columns[0]));
             } else {
-                alert('CSV Row does not match header length:', row);
+                alert('CSV Row does not match header length: ' + row);
                 error_occurred = true;
             }
         }
@@ -61,15 +44,22 @@ function processCSVData(csvData) {
             },
             body: JSON.stringify({
                 user_id: getUserId(),
+                user_name: getUserName(),
                 track_ids: track_id_list
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 404) {
+                handleUnauthorizedUser();
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.affected_rows > 0) {
                 alert(data.affected_rows + " " + data.message);
                 console.log('Songs liked:', data);
                 refreshLikedSongs();
+                refreshRecommendedSongs();
             } else {
                 alert(data.message);
             }
@@ -84,20 +74,16 @@ function processCSVData(csvData) {
     } else {
         document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader overlay
     }
-
 }
 
-
-
-// Add single track from input using spotify_link and track_id
 function addSong() {
-    var song_input = document.getElementById('songInput').value.trim();
+    let song_input = document.getElementById('songInput').value.trim();
     if (!song_input) {
         alert('Please enter a Spotify song link or upload a CSV file.');
-        return
+        return;
     }
 
-    track_id = extractTrackId(song_input)
+    let track_id = extractTrackId(song_input);
     if (track_id) {
         fetch('/like', {
             method: 'POST',
@@ -106,15 +92,22 @@ function addSong() {
             },
             body: JSON.stringify({
                 user_id: getUserId(),
+                user_name: getUserName(),
                 track_id: track_id
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 404) {
+                handleUnauthorizedUser();
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.affected_rows > 0) {
-                alert(data.affected_rows + " " + data.message)
+                alert(data.affected_rows + " " + data.message);
                 console.log('Song liked:', data);
                 refreshLikedSongs();
+                refreshRecommendedSongs();
             } else {
                 alert(data.message);
             }
@@ -131,7 +124,7 @@ function addSong() {
 
 function generateSongHTML({ track_id, track_name, artist_name, year, relevance_percentage }, actions) {
     let percentage_element = relevance_percentage ? `<span class="percentage">${relevance_percentage}%</span>` : '';
-    let link = 'https://open.spotify.com/track/' +  track_id
+    let link = 'https://open.spotify.com/track/' + track_id;
 
     return `
         <div class="list-group-item">
@@ -152,22 +145,22 @@ function generateSongHTML({ track_id, track_name, artist_name, year, relevance_p
     `;
 }
 
-function appendSongToLiked(songDetails, where) {
-    var likedSongsList = document.getElementById('likedSongsList');
-    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
+function appendSongToLiked(songDetails) {
+    let likedSongsList = document.getElementById('likedSongsList');
+    let actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
 
     likedSongsList.innerHTML = generateSongHTML(songDetails, actions) + likedSongsList.innerHTML;
 }
 
 function appendSongToDisliked(songDetails) {
-    var dislikedSongsList = document.getElementById('dislikedSongsList');
-    var actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'dislike')"><i class="fa fa-trash"></i> Remove</button>`;
+    let dislikedSongsList = document.getElementById('dislikedSongsList');
+    let actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'dislike')"><i class="fa fa-trash"></i> Remove</button>`;
     dislikedSongsList.innerHTML = generateSongHTML(songDetails, actions) + dislikedSongsList.innerHTML;
 }
 
 function appendSongToRecommendations(songDetails) {
-    var recommendedSongsList = document.getElementById('recommendedSongsList');
-    var actions = `
+    let recommendedSongsList = document.getElementById('recommendedSongsList');
+    let actions = `
         <button class="btn btn-success" onclick="likeSong(this)"><i class="fa fa-thumbs-up"></i> Like</button>
         <button class="btn btn-danger" onclick="dislikeSong(this)"><i class="fa fa-thumbs-down"></i> Dislike</button>
     `;
@@ -180,13 +173,12 @@ function extractTrackId(link) {
 }
 
 function likeSong(button) {
-    var songItem = button.parentNode.parentNode;
-    var songDetails = {
+    let songItem = button.parentNode.parentNode;
+    let songDetails = {
         track_id: songItem.querySelector('.track-id').textContent,
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-//        link: songItem.querySelector('.listen-link').href
     };
 
     if (songDetails.track_id) {
@@ -197,17 +189,23 @@ function likeSong(button) {
             },
             body: JSON.stringify({
                 user_id: getUserId(),
+                user_name: getUserName(),
                 track_id: songDetails.track_id
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 404) {
+                handleUnauthorizedUser();
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.affected_rows > 0) {
                 console.log('Song liked:', data);
                 appendSongToLiked(songDetails);
                 refreshLikedSongs();
             } else {
-                alert(data.message)
+                alert(data.message);
             }
             songItem.remove();
         })
@@ -220,13 +218,12 @@ function likeSong(button) {
 }
 
 function dislikeSong(button) {
-    var songItem = button.parentNode.parentNode;
-    var songDetails = {
+    let songItem = button.parentNode.parentNode;
+    let songDetails = {
         track_id: songItem.querySelector('.track-id').textContent,
         track_name: songItem.querySelector('.track-name').textContent,
         artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', ''),
-//        link: songItem.querySelector('.listen-link').href
     };
     appendSongToDisliked(songDetails);
     songItem.remove();
@@ -239,13 +236,18 @@ function dislikeSong(button) {
         },
         body: JSON.stringify({
             user_id: getUserId(),
+            user_name: getUserName(),
             track_id: songDetails.track_id
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status === 404) {
+            handleUnauthorizedUser();
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Song disliked:', data);
-        refreshDislikedSongs();
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -253,90 +255,176 @@ function dislikeSong(button) {
 }
 
 function removeSongFromList(button, listType) {
-    var songItem = button.parentNode.parentNode;
+    let songItem = button.parentNode.parentNode;
     songItem.parentNode.removeChild(songItem);
     // Example API call to remove the song
     fetch("/" + listType, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-                    user_id: getUserId(),
-                    track_id: songItem.querySelector('.track-id').textContent
-                })
+            user_id: getUserId(),
+            user_name: getUserName(),
+            track_id: songItem.querySelector('.track-id').textContent
+        })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status === 404) {
+            handleUnauthorizedUser();
+        }
+        return response.json();
+    })
     .then(data => {
-        console.log('Song removed from list');
-     })
-     .catch(error => console.error('Error:', error));
+        console.log('Song removed from list:', data);
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function refreshLikedSongs() {
-    var user_id = getUserId()
+    let user_id = getUserId();
+    let user_name = getUserName();
 
-    var likedSongsList = document.getElementById('likedSongsList');
+    let likedSongsList = document.getElementById('likedSongsList');
     likedSongsList.innerHTML = ''; // Clear the list
     $("#likedLoader").removeClass("hidden");
 
-    fetch("/like/" + user_id)
-    .then(response => response.json())
+    fetch(`/like/?user_id=${user_id}&user_name=${user_name}`)
+    .then(response => {
+        if (response.status === 404) {
+            handleUnauthorizedUser();
+        }
+        return response.json();
+    })
     .then(data => {
         $("#likedLoader").addClass("hidden");
-        data.forEach(song => appendSongToLiked(song));
+        if (data.length > 0) {
+            data.forEach(song => appendSongToLiked(song));
+        }
     })
     .catch(error => console.error('Error:', error));
 }
 
 function refreshDislikedSongs() {
-    var user_id = getUserId()
+    let user_id = getUserId();
+    let user_name = getUserName();
 
-    var dislikedSongsList = document.getElementById('dislikedSongsList');
+    let dislikedSongsList = document.getElementById('dislikedSongsList');
     dislikedSongsList.innerHTML = ''; // Clear the list
     $("#dislikedLoader").removeClass("hidden");
 
-    fetch("/dislike/" + user_id)
-    .then(response => response.json())
+    fetch(`/dislike/?user_id=${user_id}&user_name=${user_name}`)
+    .then(response => {
+        if (response.status === 404) {
+            handleUnauthorizedUser();
+        }
+        return response.json();
+    })
     .then(data => {
         $("#dislikedLoader").addClass("hidden");
-        data.forEach(song => appendSongToDisliked(song));
+        if (data.length > 0) {
+            data.forEach(song => appendSongToDisliked(song));
+        }
     })
     .catch(error => console.error('Error:', error));
 }
 
 function refreshRecommendedSongs() {
-    var user_id = getUserId()
+    let user_id = getUserId();
+    let user_name = getUserName();
 
-    var recommendedSongsList = document.getElementById('recommendedSongsList');
+    let recommendedSongsList = document.getElementById('recommendedSongsList');
     recommendedSongsList.innerHTML = ''; // Clear the list
     $("#recommendationsLoader").removeClass("hidden");
 
-    fetch("/recommendation/" + user_id)
-    .then(response => response.json())
+    fetch(`/recommendation/?user_id=${user_id}&user_name=${user_name}`)
+    .then(response => {
+        if (response.status === 404) {
+            handleUnauthorizedUser();
+        }
+        return response.json();
+    })
     .then(data => {
         $("#recommendationsLoader").addClass("hidden");
-        data.forEach(song => appendSongToRecommendations(song));
+        if (data.length > 0) {
+            data.forEach(song => appendSongToRecommendations(song));
+        }
     })
     .catch(error => {
         $("#recommendationsLoader").addClass("hidden");
         console.error('Error:', error);
-    })
+    });
 }
 
-// Check if user is logged in
-const user_id = localStorage.getItem('user_id');
-if (!user_id) {
-    window.location.href = '/';
-};
-
 function refreshScreen() {
-    var user_id = getUserId()
-    var user_name = getUserName()
+    let user_id = getUserId();
+    let user_name = getUserName();
     if (user_id) {
-        $("#username").text(user_name)
-        refreshLikedSongs()
-        refreshDislikedSongs()
-        refreshRecommendedSongs()
+        $("#username").text(user_name);
+        refreshLikedSongs();
+        refreshDislikedSongs();
+        refreshRecommendedSongs();
     }
 }
 
-refreshScreen()
+// Verify user function
+function verifyUser() {
+    const user_id = localStorage.getItem('user_id');
+    const user_name = localStorage.getItem('user_name');
+
+    if (!user_id || !user_name) {
+        return Promise.resolve(false);
+    }
+
+    return fetch(`/verify_user?user_id=${user_id}&user_name=${user_name}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+       return response.ok;
+    })
+    .catch(error => {
+        console.error("An error occurred while verifying the user:", error);
+        return false;
+    });
+}
+
+function handleUnauthorizedUser() {
+    alert('Invalid User!!');
+    localStorage.removeItem(CACHE_USER_ID_KEY);
+    localStorage.removeItem(CACHE_USER_NAME_KEY);
+    window.location.href = '/';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem(CACHE_USER_ID_KEY);
+        localStorage.removeItem(CACHE_USER_NAME_KEY);
+        window.location.href = '/';
+    });
+
+    document.getElementById('csvFileInput').addEventListener('change', function(event) {
+        let file = event.target.files[0];
+        let reader = new FileReader();
+
+        reader.onload = function(event) {
+            let csvData = event.target.result;
+            processCSVData(csvData);
+        };
+
+        reader.readAsText(file);
+    });
+
+    refreshScreen();
+});
+
+// Check if user is logged in
+const user_id = localStorage.getItem('user_id');
+verifyUser().then(isVerified => {
+    if (!isVerified) {
+        alert('Invalid User!!');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
+        window.location.href = '/';
+    }
+});

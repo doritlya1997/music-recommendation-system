@@ -17,9 +17,11 @@ class Track(BaseModel):
 
 class UserTrackRequest(BaseModel):
     user_id: int
+    user_name: str
     track_id: str
 
 
 class CSVUploadRequest(BaseModel):
     user_id: int
+    user_name: str
     track_ids: List[str]

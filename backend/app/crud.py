@@ -1,12 +1,12 @@
 from .database import get_db
 
 
-def user_exists(user_id: int):
+def user_exists(user_id: int, user_name: str) -> bool:
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
+            cur.execute("SELECT id, username FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
-            return user is not None
+            return user and user['username'] == user_name
 
 
 def create_user(username: str, hashed_password: str):
@@ -89,9 +89,6 @@ def get_disliked_tracks(user_id: int):
 
 
 def add_like(user_id: int, track_id: str):
-    if not user_exists(user_id):
-        return False, "User does not exist."
-
     with get_db() as conn:
         with conn.cursor() as cur:
             # Check if the track_id exists in the dislikes table for the user
@@ -117,9 +114,6 @@ def add_like(user_id: int, track_id: str):
 
 
 def upload_csv(user_id: int, track_ids: list):
-    if not user_exists(user_id):
-        return False
-
     affected_rows = 0
     for track_id in track_ids:
         if add_like(user_id, track_id)[0]:
@@ -128,9 +122,6 @@ def upload_csv(user_id: int, track_ids: list):
 
 
 def add_dislike(user_id: int, track_id: str):
-    if not user_exists(user_id):
-        return False
-
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -139,32 +130,20 @@ def add_dislike(user_id: int, track_id: str):
                 ON CONFLICT (user_id, track_id) DO NOTHING;
             """, (user_id, track_id))
             conn.commit()
-            return True
 
 
 def remove_like(user_id: int, track_id: str):
-    if not user_exists(user_id):
-        return False
-
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""DELETE FROM likes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
-            return True
 
 
 def remove_dislike(user_id: int, track_id: str):
-    if not user_exists(user_id):
-        return False
-
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""DELETE FROM dislikes WHERE user_id = %s AND track_id = %s;""", (user_id, track_id))
             conn.commit()
-            return True
-
-
-# Recommendations
 
 
 def get_tracks_by_id_and_score(top_tracks: list[tuple]):
@@ -179,7 +158,6 @@ def get_tracks_by_id_and_score(top_tracks: list[tuple]):
             ) AS derived_table(track_id_col, relevance_percentage)
         ) AS recommended
         ON tracks.track_id = recommended.track_id_col;"""
-    # print(query)
 
     with get_db() as conn:
         with conn.cursor() as cur:

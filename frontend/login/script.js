@@ -91,7 +91,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if user is logged in
     const user_id = localStorage.getItem('user_id');
-    if (user_id) {
-        window.location.href = '/static/recommendation/index.html';
+    const user_name = localStorage.getItem('user_name');
+    if (user_id && user_name) {
+        verifyUser(user_id, user_name);
     }
 });
+
+function handleUnauthorizedUser() {
+    alert('Invalid User!!');
+    localStorage.removeItem(CACHE_USER_ID_KEY);
+    localStorage.removeItem(CACHE_USER_NAME_KEY);
+    window.location.href = '/';
+}
+
+function verifyUser(user_id, user_name) {
+    fetch(`/verify_user?user_id=${user_id}&user_name=${user_name}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/static/recommendation/index.html';
+        } else {
+            handleUnauthorizedUser()
+        }
+    })
+    .catch(error => {
+        console.error("An error occurred while verifying the user:", error);
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
+    });
+}

@@ -5,6 +5,7 @@ from .. import crud, algo
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
+
 router = APIRouter()
 
 
@@ -27,62 +28,83 @@ def login(user: User):
             'user_name': dbuser['user_name']}
 
 
-@router.get("/like/{user_id}")
-def get_likes(user_id: int):
+@router.get("/verify_user", status_code=200)
+def verify_user(user_id: int, user_name: str):
+    if not crud.user_exists(user_id, user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User exists"}
+
+
+@router.get("/like")
+def get_likes(user_id: int, user_name: str):
+    if not crud.user_exists(user_id, user_name):
+        raise HTTPException(status_code=404, detail="User not found")
     return crud.get_likes(user_id)
 
 
-@router.get("/dislike/{user_id}")
-def get_dislikes(user_id: int):
+@router.get("/dislike")
+def get_dislikes(user_id: int, user_name: str):
+    if not crud.user_exists(user_id, user_name):
+        raise HTTPException(status_code=404, detail="User not found")
     return crud.get_dislikes(user_id)
 
 
 @router.post("/like/csv")
 def upload_csv(request: CSVUploadRequest):
+    if not crud.user_exists(request.user_id, request.user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
     affected_rows = crud.upload_csv(request.user_id, request.track_ids)
     if affected_rows == 0:
         return {"status": "200", "message": "All liked tracks already exist", "affected_rows": affected_rows}
-    elif affected_rows > 0:
+    else:
         return {"status": "200", "message": "Likes were added successfully", "affected_rows": affected_rows}
-    elif affected_rows == False:
-        raise HTTPException(status_code=404, detail="User not found")
 
 
 @router.post("/like")
 def add_like_route(request: UserTrackRequest):
+    if not crud.user_exists(request.user_id, request.user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
     success, message = crud.add_like(request.user_id, request.track_id)
     if success:
         return {"status": "200", "message": message, "affected_rows": 1}
-    elif message == "User does not exist.":
-        raise HTTPException(status_code=400, detail=message)
     else:
         return {"status": "200", "message": message, "affected_rows": 0}
 
 
 @router.post("/dislike")
 def add_dislike(request: UserTrackRequest):
-    if not crud.add_dislike(request.user_id, request.track_id):
-        raise HTTPException(status_code=400, detail="User not found")
+    if not crud.user_exists(request.user_id, request.user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    crud.add_dislike(request.user_id, request.track_id)
     return {"status": "200"}
 
 
 @router.delete("/like")
 def remove_like(request: UserTrackRequest):
-    print(request)
-    if not crud.remove_like(request.user_id, request.track_id):
-        raise HTTPException(status_code=400, detail="Track not found")
+    if not crud.user_exists(request.user_id, request.user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    crud.remove_like(request.user_id, request.track_id)
     return {"status": "200"}
 
 
 @router.delete("/dislike")
 def remove_dislike(request: UserTrackRequest):
-    if not crud.remove_dislike(request.user_id, request.track_id):
-        raise HTTPException(status_code=400, detail="Track not found")
+    if not crud.user_exists(request.user_id, request.user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    crud.remove_dislike(request.user_id, request.track_id)
     return {"status": "200"}
 
 
-@router.get("/recommendation/{user_id}", response_model=List[Track])
-def get_recommendations(user_id: int):
+@router.get("/recommendation", response_model=List[Track])
+def get_recommendations(user_id: int, user_name: str):
+    if not crud.user_exists(user_id, user_name):
+        raise HTTPException(status_code=404, detail="User not found")
+
     return algo.get_recommendations_by_user_listening_history(user_id)
 
 # TODO: recommendation by user listening history
