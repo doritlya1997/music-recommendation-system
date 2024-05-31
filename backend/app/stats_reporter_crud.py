@@ -63,6 +63,7 @@ def user_requested_recommendations_report(user_id: int) -> None:
             conn.commit()
 
 
+
 def user_ignored_recommendations_report(user_id: int) -> None:
     with get_db() as conn:
         with conn.cursor() as cur:
