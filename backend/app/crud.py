@@ -159,7 +159,7 @@ def get_recommended_tracks_by_user_listening_history(top_tracks: list[tuple], us
             FROM dislikes
             WHERE user_id = {user_id}
         )
-        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year
+        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year, 'user_history' as source
         FROM (
             SELECT track_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
             FROM (
@@ -192,7 +192,7 @@ def get_recommended_tracks_by_top_similar_users(top_users, user_id):
             FROM dislikes
             WHERE user_id = {user_id}
         )
-        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
+        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year, 'similar_users' as source
         FROM (  SELECT user_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
                 FROM (
                 VALUES {values_clause}

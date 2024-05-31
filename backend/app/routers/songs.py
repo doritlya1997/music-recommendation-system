@@ -109,9 +109,8 @@ def get_recommendations(user_id: int, user_name: str):
     if not crud.user_exists(user_id, user_name):
         raise HTTPException(status_code=404, detail="User not found")
 
-    return algo.get_recommendations_by_user_listening_history(user_id)
+    # return algo.get_recommendations_by_user_listening_history(user_id)
     # return algo.get_recommendations_by_similar_users(user_id)
+    return algo.get_combined_recommendation(user_id)
 
-# TODO: recommendation by user listening history
-# TODO: recommendation by similar user - top tracks
-# TODO: recommendation by favorite artists - get data from spotify. update db and parquet files.
+# TODO: recommendation by favorite artists - get data from spotify. update db and vector db.
