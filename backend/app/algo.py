@@ -145,5 +145,6 @@ def get_combined_recommendation(user_id: int):
         return []
 
     # TODO: define numbers in Config Vars, also previous functions
-    shuffled_list = random.sample(combined, 40)
+    sample_size = min(len(user_history), len(similar_users))
+    shuffled_list = random.sample(combined, sample_size)
     return shuffled_list
