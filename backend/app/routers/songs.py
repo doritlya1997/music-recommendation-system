@@ -116,12 +116,17 @@ def remove_dislike(request: UserTrackRequest):
 
 
 @router.get("/recommendation", response_model=List[Track])
-def get_recommendations(user_id: int, user_name: str):
+def get_recommendations(user_id: int, user_name: str, is_from_button: bool, is_user_ignored_recommendations: bool):
     if not crud.user_exists(user_id, user_name):
         raise HTTPException(status_code=404, detail="User not found")
 
     # return algo.get_recommendations_by_user_listening_history(user_id)
     # return algo.get_recommendations_by_similar_users(user_id)
-    return algo.get_combined_recommendation(user_id)
+    result = algo.get_combined_recommendation(user_id)
+    if is_from_button:
+        stats_reporter_crud.user_requested_recommendations_report(user_id)
+    if is_user_ignored_recommendations:
+        stats_reporter_crud.user_ignored_recommendations_report(user_id)
+    return result
 
 # TODO: recommendation by favorite artists - get data from spotify. update db and vector db.

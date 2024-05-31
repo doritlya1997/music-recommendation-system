@@ -53,13 +53,13 @@ def user_disliked_recommended_track_report(user_id: int, track_id: str, recommen
             conn.commit()
 
 
-def user_requested_recommendations_report(user_id: int, track_id: str, recommendation_type: str) -> None:
+def user_requested_recommendations_report(user_id: int) -> None:
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                            INSERT INTO user_events (user_id, event_id, track_id, recommendation_type) 
-                            VALUES (%s, %s, %s, %s);
-                        """, (user_id, 6, track_id, recommendation_type))
+                            INSERT INTO user_events (user_id, event_id) 
+                            VALUES (%s, %s);
+                        """, (user_id, 6))
             conn.commit()
 
 
