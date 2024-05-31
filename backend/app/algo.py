@@ -8,8 +8,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
-from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users
-from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids
+from backend.app.crud import get_recommended_tracks_by_user_listening_history, \
+    get_recommended_tracks_by_top_similar_users, get_liked_tracks
+from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone
+
+COLS_FOR_SIMILARITY = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence', 'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024', 'update_timestamp']
 
 
 def weighted_mean(df, col="update_timestamp"):
@@ -22,7 +25,7 @@ def weighted_mean(df, col="update_timestamp"):
     max_date = df.max()
 
     # check if short period of tim
-    if (max_date['update_timestamp'] - min_date['update_timestamp']).days < 7:
+    if (max_date[col] - min_date[col]).days < 7:
         mean_df = df.mean().drop(col)
     else:
         # calculate each quantile mean and multiply be matching weight
@@ -40,6 +43,54 @@ def weighted_mean(df, col="update_timestamp"):
 
         mean_df = all_quantile_df.mean(axis=1)
     return mean_df
+
+
+def update_user_mean_vector(user_id: int):
+    user_liked_tracks = get_liked_tracks(user_id)
+    print(user_liked_tracks)
+    print(type(user_liked_tracks))
+
+    all_columns_df = pd.DataFrame.from_records(user_liked_tracks)
+    mean_columns_df = all_columns_df[COLS_FOR_SIMILARITY]
+
+    # Calc mean vector
+    user_mean_vector_df = weighted_mean(mean_columns_df)
+    print(user_mean_vector_df)
+
+    user_vector_to_update = [
+        {
+            "id": str(user_id),
+            "metadata": {
+                "num_tracks": len(user_liked_tracks) * 2000
+            },
+            "values": [
+                round(float(user_mean_vector_df["acousticness"]), 3),
+                round(float(user_mean_vector_df["danceability"]), 3),
+                round(float(user_mean_vector_df["energy"]), 3),
+                round(float(user_mean_vector_df["instrumentalness"]), 3),
+                round(float(user_mean_vector_df["liveness"]), 3),
+                round(float(user_mean_vector_df["loudness"]), 3),
+                round(float(user_mean_vector_df["mode"]), 3),
+                round(float(user_mean_vector_df["popularity"]), 3),
+                round(float(user_mean_vector_df["speechiness"]), 3),
+                round(float(user_mean_vector_df["tempo"]), 3),
+                round(float(user_mean_vector_df["valence"]), 3),
+                round(float(user_mean_vector_df["year_2000_2004"]), 3),
+                round(float(user_mean_vector_df["year_2005_2009"]), 3),
+                round(float(user_mean_vector_df["year_2010_2014"]), 3),
+                round(float(user_mean_vector_df["year_2015_2019"]), 3),
+                round(float(user_mean_vector_df["year_2020_2024"]), 3)
+            ]
+        }
+    ]
+    print(user_vector_to_update)
+
+    num_user_vectors_affected = upsert_pinecone('users', user_vector_to_update)
+    if len(user_vector_to_update) == num_user_vectors_affected:
+        print(f"Updated user_id={user_id} vector={user_vector_to_update}")
+        return True
+    return
+    # TODO: retry?
 
 
 def get_recommendations_by_user_listening_history(user_id: int):
