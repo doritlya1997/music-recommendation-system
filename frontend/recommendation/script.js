@@ -164,7 +164,6 @@ function generateSongHTML({ track_id, track_name, artist_name, year, relevance_p
 function appendSongToLiked(songDetails) {
     let likedSongsList = document.getElementById('likedSongsList');
     let actions = `<button class="btn btn-danger" onclick="removeSongFromList(this, 'like')"><i class="fa fa-trash"></i> Remove</button>`;
-
     likedSongsList.innerHTML = generateSongHTML(songDetails, actions) + likedSongsList.innerHTML;
 }
 
@@ -196,6 +195,8 @@ function likeSong(button) {
         artist_name: songItem.querySelector('.artist-name').textContent,
         year: songItem.querySelector('.year').textContent.replace('(', '').replace(')', '')
     };
+    appendSongToLiked(songDetails);
+    songItem.remove();
 
     if (songDetails.track_id) {
         fetch('/like', {
@@ -219,8 +220,6 @@ function likeSong(button) {
         .then(data => {
             if (data.affected_rows > 0) {
                 console.log('Song liked:', data);
-                appendSongToLiked(songDetails);
-                refreshLikedSongs();
             } else {
                 alert(data.message);
             }
