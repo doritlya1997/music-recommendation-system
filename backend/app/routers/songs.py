@@ -60,8 +60,8 @@ def upload_csv(request: CSVUploadRequest):
     if affected_rows == 0:
         return {"status": "200", "message": "All liked tracks already exist", "affected_rows": affected_rows}
     else:
+        update_user_mean_vector(request.user_id)
         return {"status": "200", "message": "Likes were added successfully", "affected_rows": affected_rows}
-
 
 @router.post("/like")
 def add_like_route(request: UserTrackRequest):
@@ -70,6 +70,7 @@ def add_like_route(request: UserTrackRequest):
 
     success, message = crud.add_like(request.user_id, request.track_id)
     if success:
+        update_user_mean_vector(request.user_id)
         return {"status": "200", "message": message, "affected_rows": 1}
     else:
         return {"status": "200", "message": message, "affected_rows": 0}
@@ -90,6 +91,7 @@ def remove_like(request: UserTrackRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     crud.remove_like(request.user_id, request.track_id)
+    update_user_mean_vector(request.user_id)
     return {"status": "200"}
 
 

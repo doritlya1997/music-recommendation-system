@@ -61,7 +61,7 @@ def update_user_mean_vector(user_id: int):
         {
             "id": str(user_id),
             "metadata": {
-                "num_tracks": len(user_liked_tracks) * 2000
+                "num_tracks": len(user_liked_tracks)
             },
             "values": [
                 round(float(user_mean_vector_df["acousticness"]), 3),
