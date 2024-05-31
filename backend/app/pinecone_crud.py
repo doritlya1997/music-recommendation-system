@@ -14,14 +14,8 @@ def query_pinecone_by_ids(index_name: str, id_list: list[str]):
 
 
 def upsert_pinecone(index_name: str, vectors: list[dict]):
-    #TODO: delete __test_upsert
-    # index_name = index_name + "__test_upsert"
-
-    print(f"{len(vectors)}")
-    print(vectors)
     with get_pinecone_index(index_name) as index:
         response = index.upsert(vectors=vectors)
         if response:
             return response.get('upsertedCount')
         return 0
-
