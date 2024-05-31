@@ -8,49 +8,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import glob
 import os
 from backend.app import crud
-from backend.app.crud import get_tracks_by_id_and_score
-from backend.app.pinecone_crud import query_pinecone
+from backend.app.crud import get_recommended_tracks_by_user_listening_history, \
+    get_recommended_tracks_by_top_similar_users, get_liked_tracks
+from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone
 
-
-def get_tracks_df(user_id: int, type: str):
-    tuples_list = []
-    if type == "like":
-        tuples_list = crud.get_liked_tracks(user_id)
-    else:
-        tuples_list = crud.get_disliked_tracks(user_id)
-
-    columns = [
-        "track_id",
-        "id",
-        "artist_name",
-        "track_name",
-        "popularity",
-        "year",
-        "genre",
-        "danceability",
-        "energy",
-        "key",
-        "loudness",
-        "mode",
-        "speechiness",
-        "acousticness",
-        "instrumentalness",
-        "liveness",
-        "valence",
-        "tempo",
-        "duration_ms",
-        "time_signature",
-        "year_2000_2004",
-        "year_2005_2009",
-        "year_2010_2014",
-        "year_2015_2019",
-        "year_2020_2024",
-        "update_timestamp"
-    ]
-
-    # transform the list into a pandas DataFrame
-    df = pd.DataFrame(tuples_list, columns=columns)
-    return df
+COLS_FOR_SIMILARITY = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence', 'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024', 'update_timestamp']
 
 
 def weighted_mean(df, col="update_timestamp"):
@@ -63,7 +25,7 @@ def weighted_mean(df, col="update_timestamp"):
     max_date = df.max()
 
     # check if short period of tim
-    if (max_date['update_timestamp'] - min_date['update_timestamp']).days < 7:
+    if (max_date[col] - min_date[col]).days < 7:
         mean_df = df.mean().drop(col)
     else:
         # calculate each quantile mean and multiply be matching weight
@@ -83,90 +45,97 @@ def weighted_mean(df, col="update_timestamp"):
     return mean_df
 
 
-# def get_recommendations_by_user_listening_history_files(user_id: int):
-#     cols_for_similarity = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence',
-#                            'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024',
-#                            'update_timestamp']
-#     other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
-#
-#     tracks_df = pd.concat(map(partial(pd.read_parquet),
-#                               glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
-#     tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
-#     tracks_other_cols_df = tracks_df[other_cols]
-#
-#     user_likes_playlist = get_tracks_df(user_id, type="like")
-#     user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
-#
-#     if len(user_likes_playlist) == 0:
-#         return []
-#
-#     user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
-#     user_likes_other_cols_df = user_likes_playlist[other_cols]
-#     column_averages = weighted_mean(user_likes_similarity_df)
-#     user_likes_similarity_df_mean = pd.DataFrame([column_averages], index=['Average'])
-#
-#     tracks_similarity_df = tracks_similarity_df.sort_index(axis=1)
-#     user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
-#
-#     similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
-#     tracks_similarity_df['relevance_percentage'] = similarity_scores
-#     tracks_similarity_df['relevance_percentage'] = tracks_similarity_df['relevance_percentage'].mul(100).round(1)
-#
-#     # Reset indexes to ensure uniqueness
-#     tracks_similarity_df = tracks_similarity_df.reset_index(drop=True)
-#     tracks_other_cols_df = tracks_other_cols_df.reset_index(drop=True)
-#
-#     scored_tracks_df = pd.concat([tracks_similarity_df, tracks_other_cols_df], axis=1, join='inner')
-#
-#     # remove tracks which are already liked/disliked
-#     top_similarities = scored_tracks_df.sort_values(by='relevance_percentage', ascending=False)
-#     top_similarities = top_similarities[~top_similarities['track_id'].isin(user_likes_playlist['track_id'])]
-#
-#     if len(user_dislikes_playlist) > 0:
-#         top_similarities = top_similarities[~top_similarities['track_id'].isin(user_dislikes_playlist['track_id'])]
-#     top_similarities = top_similarities.head(10)
-#
-#     top_similarities = top_similarities[['track_id', 'track_name', 'artist_name', 'relevance_percentage', 'year']]
-#
-#     lod = top_similarities.to_dict('records')
-#     return lod
+def update_user_mean_vector(user_id: int):
+    user_liked_tracks = get_liked_tracks(user_id)
+    print(user_liked_tracks)
+    print(type(user_liked_tracks))
+
+    all_columns_df = pd.DataFrame.from_records(user_liked_tracks)
+    mean_columns_df = all_columns_df[COLS_FOR_SIMILARITY]
+
+    # Calc mean vector
+    user_mean_vector_df = weighted_mean(mean_columns_df)
+    print(user_mean_vector_df)
+
+    user_vector_to_update = [
+        {
+            "id": str(user_id),
+            "metadata": {
+                "num_tracks": len(user_liked_tracks) * 2000
+            },
+            "values": [
+                round(float(user_mean_vector_df["acousticness"]), 3),
+                round(float(user_mean_vector_df["danceability"]), 3),
+                round(float(user_mean_vector_df["energy"]), 3),
+                round(float(user_mean_vector_df["instrumentalness"]), 3),
+                round(float(user_mean_vector_df["liveness"]), 3),
+                round(float(user_mean_vector_df["loudness"]), 3),
+                round(float(user_mean_vector_df["mode"]), 3),
+                round(float(user_mean_vector_df["popularity"]), 3),
+                round(float(user_mean_vector_df["speechiness"]), 3),
+                round(float(user_mean_vector_df["tempo"]), 3),
+                round(float(user_mean_vector_df["valence"]), 3),
+                round(float(user_mean_vector_df["year_2000_2004"]), 3),
+                round(float(user_mean_vector_df["year_2005_2009"]), 3),
+                round(float(user_mean_vector_df["year_2010_2014"]), 3),
+                round(float(user_mean_vector_df["year_2015_2019"]), 3),
+                round(float(user_mean_vector_df["year_2020_2024"]), 3)
+            ]
+        }
+    ]
+    print(user_vector_to_update)
+
+    num_user_vectors_affected = upsert_pinecone('users', user_vector_to_update)
+    if len(user_vector_to_update) == num_user_vectors_affected:
+        print(f"Updated user_id={user_id} vector={user_vector_to_update}")
+        return True
+    return
+    # TODO: retry?
 
 
 def get_recommendations_by_user_listening_history(user_id: int):
+    retrieve_user_results = query_pinecone_by_ids('users', [str(user_id)])
+    user_record = retrieve_user_results.get('vectors').get(str(user_id))
 
-    cols_for_similarity = ["acousticness", "danceability", "energy", "instrumentalness", "liveness", "loudness", "mode",
-                           "popularity", "speechiness", "tempo", "valence",
-                           "year_2000_2004", "year_2005_2009", "year_2010_2014", "year_2015_2019", "year_2020_2024",
-                           "update_timestamp"]
-    other_cols = ['artist_name', 'duration_ms', 'genre', 'id', 'key', 'year', 'time_signature', 'track_id', 'track_name']
+    if not user_record:
+        return []  # user has no likes or dislikes, can't recommend
+    user_vector = user_record.get('values')
+    print(f"user_vector: {user_vector}")
 
-    user_likes_playlist = get_tracks_df(user_id, type="like")
-    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
-
-    if len(user_likes_playlist) == 0:
-        return []
-
-    user_likes_similarity_df = user_likes_playlist[cols_for_similarity]
-    column_averages = weighted_mean(user_likes_similarity_df).tolist()
-
-    top_k_recommendations = 2 * (len(user_likes_playlist) + len(user_dislikes_playlist))
+    # TODO: add len(user_likes_playlist) + len(user_dislikes_playlist) as METADATA to DB
+    top_k_recommendations = 50# max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
     print(f"Getting top {top_k_recommendations} vectors from pinecone")
 
     # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
-    query_result = query_pinecone(column_averages, top_k_recommendations)
+    query_result = query_pinecone_by_vector('tracks', user_vector, top_k_recommendations)
     top_ids_scores = [(match['id'], match['score']) for match in query_result['matches']]
-
-    # Excluding already liked and disliked tracks from top similar tracks list
-    likes_track_ids = user_likes_playlist['track_id'].tolist()
-    dislikes_track_ids = user_dislikes_playlist['track_id'].tolist()
-    top_ids_scores = [(t_id, t_score)
-                      for t_id, t_score in top_ids_scores
-                      if t_id not in likes_track_ids and t_id not in dislikes_track_ids]
-    print(f"After excluding already liked, and disliked tracks, Got {len(top_ids_scores)} recommended tracks")
 
     # Get tracks information by 'track_id', and add the similarity 'score' pinecone calculated
     if len(top_ids_scores) > 0:
-        result = get_tracks_by_id_and_score(top_ids_scores)
+        result = get_recommended_tracks_by_user_listening_history(top_ids_scores, user_id)
         return result
     return []
 
+
+def get_recommendations_by_similar_users(user_id: int):
+    retrieve_user_results = query_pinecone_by_ids('users', [str(user_id)])
+    user_record = retrieve_user_results.get('vectors').get(str(user_id))
+
+    if not user_record:
+        return []  # user has no likes or dislikes, can't recommend
+    user_vector = user_record.get('values')
+    print(f"user_vector: {user_vector}")
+
+    # get similar user from pinecone, take top k user_id
+    # Query Pinecone 'users' index, using 'cosine' metric, to find the top most similar vectors
+    query_user_results = query_pinecone_by_vector('users', user_vector, top_k=20)
+    top_ids_scores = [(match.get('id'), match.get('score')) for match in query_user_results.get('matches')]
+    print(f"top_ids_scores: {top_ids_scores}")
+
+    if not len(top_ids_scores):
+        return []
+
+    result = get_recommended_tracks_by_top_similar_users(top_ids_scores, user_id)
+    print(len(result))
+    return result
+    # TODO: randomize the results

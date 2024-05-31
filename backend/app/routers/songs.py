@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import HTTPException, APIRouter
 from .. import crud, algo
+from ..algo import update_user_mean_vector
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
 
@@ -107,6 +108,7 @@ def get_recommendations(user_id: int, user_name: str):
         raise HTTPException(status_code=404, detail="User not found")
 
     return algo.get_recommendations_by_user_listening_history(user_id)
+    # return algo.get_recommendations_by_similar_users(user_id)
 
 # TODO: recommendation by user listening history
 # TODO: recommendation by similar user - top tracks
