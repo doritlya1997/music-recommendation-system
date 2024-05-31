@@ -159,7 +159,7 @@ def get_recommended_tracks_by_user_listening_history(top_tracks: list[tuple], us
             FROM dislikes
             WHERE user_id = {user_id}
         )
-        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year
+        SELECT tracks.track_id, track_name, artist_name, relevance_percentage, year, 'user_history' as recommendation_type
         FROM (
             SELECT track_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
             FROM (
@@ -170,7 +170,6 @@ def get_recommended_tracks_by_user_listening_history(top_tracks: list[tuple], us
         LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
         WHERE current_user_likes_dislikes.track_id IS NULL;
     """
-    # print(query)
 
     with get_db() as conn:
         with conn.cursor() as cur:
@@ -192,7 +191,7 @@ def get_recommended_tracks_by_top_similar_users(top_users, user_id):
             FROM dislikes
             WHERE user_id = {user_id}
         )
-        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
+        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year, 'similar_users' as recommendation_type
         FROM (  SELECT user_id_col, ROUND(100 * relevance_percentage, 2) as relevance_percentage
                 FROM (
                 VALUES {values_clause}
@@ -202,7 +201,6 @@ def get_recommended_tracks_by_top_similar_users(top_users, user_id):
         LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
         WHERE current_user_likes_dislikes.track_id IS NULL;
         """
-    print(query)
 
     with get_db() as conn:
         with conn.cursor() as cur:
