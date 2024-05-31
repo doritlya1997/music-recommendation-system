@@ -89,7 +89,6 @@ def update_user_mean_vector(user_id: int):
         print(f"Updated user_id={user_id} vector={user_vector_to_update}")
         return True
     return
-    # TODO: retry?
 
 
 def get_recommendations_by_user_listening_history(user_id: int):
@@ -99,11 +98,10 @@ def get_recommendations_by_user_listening_history(user_id: int):
     if not user_record:
         return []  # user has no likes or dislikes, can't recommend
     user_vector = user_record.get('values')
-    print(f"user_vector: {user_vector}")
 
-    # TODO: add len(user_likes_playlist) + len(user_dislikes_playlist) as METADATA to DB
-    top_k_recommendations = 50# max(2 * (len(user_likes_playlist) + len(user_dislikes_playlist)), 50)
-    print(f"Getting top {top_k_recommendations} vectors from pinecone")
+    # TODO: change to configvar
+    top_k_recommendations = 2 * user_record.get('metadata').get('num_tracks')
+    top_k_recommendations = 50 if top_k_recommendations < 50 else top_k_recommendations
 
     # Query Pinecone 'tracks' index, using 'cosine' metric, to find the top most similar vectors
     query_result = query_pinecone_by_vector('tracks', user_vector, top_k_recommendations)
@@ -123,27 +121,28 @@ def get_recommendations_by_similar_users(user_id: int):
     if not user_record:
         return []  # user has no likes or dislikes, can't recommend
     user_vector = user_record.get('values')
-    print(f"user_vector: {user_vector}")
 
     # get similar user from pinecone, take top k user_id
     # Query Pinecone 'users' index, using 'cosine' metric, to find the top most similar vectors
-    query_user_results = query_pinecone_by_vector('users', user_vector, top_k=20)
+    top_k_users = 20
+    query_user_results = query_pinecone_by_vector('users', user_vector, top_k=top_k_users)
     top_ids_scores = [(match.get('id'), match.get('score')) for match in query_user_results.get('matches')]
-    print(f"top_ids_scores: {top_ids_scores}")
 
     if not len(top_ids_scores):
         return []
 
     result = get_recommended_tracks_by_top_similar_users(top_ids_scores, user_id)
-    print(len(result))
+    # TODO: change to configvar
     return result
-    # TODO: randomize the results
 
 
 def get_combined_recommendation(user_id: int):
     user_history = get_recommendations_by_user_listening_history(user_id)
     similar_users = get_recommendations_by_similar_users(user_id)
     combined = user_history + similar_users
+
+    if not combined:
+        return []
 
     # TODO: define numbers in Config Vars, also previous functions
     shuffled_list = random.sample(combined, 40)
