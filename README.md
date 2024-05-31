@@ -10,7 +10,10 @@ heroku git:remote -a music-application
 git push heroku main
 heroku open -a music-application
 ```
-
+### Run project locally
+```
+uvicorn backend.app:app --host 0.0.0.0 --port 8080 
+```
 ### Run Heroku local as debug:
 ````
 heroku config:set DEBUG=True

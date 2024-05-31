@@ -626,18 +626,18 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_API_KEY="248cf0f2-be45-4f5e-9854-67884f601c89"
 
 
-# @contextmanager
-# def get_pinecone_conn():
-#     # Initialize Pinecone connection
-#     pc = Pinecone(api_key=PINECONE_API_KEY)
-#     conn = pc.Index('tracks')
-#     try:
-#         yield conn
-#     except Exception as e:
-#         print(e)
-#     finally:
-#         # Explicitly delete the connection object
-#         del conn
+@contextmanager
+def get_pinecone_conn(index_name: str):
+    # Initialize Pinecone connection
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    conn = pc.Index(index_name)
+    try:
+        yield conn
+    except Exception as e:
+        print(e)
+    finally:
+        # Explicitly delete the connection object
+        del conn
 
 
 def get_tracks_df(user_id: int, type: str):
@@ -688,11 +688,11 @@ def get_tracks_df(user_id: int, type: str):
 
     # transform the list into a pandas DataFrame
     df = pd.DataFrame(tuples_list, columns=columns)
-    display(df)
+    # display(df)
     return df
 
 
-def get_tracks_by_id_score(top_tracks):
+def get_tracks_by_track_id_score(top_tracks):
     """
     SELECT track_id, track_name, artist_name, relevance_percentage, year
     FROM tracks
@@ -720,6 +720,34 @@ def get_tracks_by_id_score(top_tracks):
     print(result)
     return result
 
+
+def get_likes_by_user_id_score(top_users):
+    """
+    SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
+    FROM (  SELECT user_id_col, relevance_percentage
+    FROM (
+        VALUES (CAST('34' AS INT), 0.99),
+                (CAST('35' AS INT), 0.88)
+        ) AS derived_table(user_id_col, relevance_percentage)) as top_users
+    JOIN likes ON top_users.user_id_col = likes.user_id
+    JOIN tracks ON likes.track_id = tracks.track_id;
+    """
+
+    values_clause = ", ".join([f"(CAST('{track_id}' AS INT), {relevance_percentage})" for track_id, relevance_percentage in top_users])
+    query = f"""
+        SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
+        FROM (  SELECT user_id_col, relevance_percentage
+        FROM (
+            VALUES {values_clause}
+            ) AS derived_table(user_id_col, relevance_percentage)) as top_users
+        JOIN likes ON top_users.user_id_col = likes.user_id
+        JOIN tracks ON likes.track_id = tracks.track_id;
+        """
+    print(query)
+
+    result = query_db(query, return_early=True)
+    print(result)
+    return result
 
 def get_recommendations_pinecone(user_id=7):
 
@@ -761,25 +789,48 @@ def get_recommendations_pinecone(user_id=7):
     print(top_ids_scores)
 
     if len(top_ids_scores) > 0:
-        result = get_tracks_by_id_score(top_ids_scores)
+        result = get_tracks_by_track_id_score(top_ids_scores)
 
-    # tracks_df = pd.concat(map(partial(pd.read_parquet),
-    #                           glob.glob("./scripts/data_ready_for_db_parquet/*.parquet")))
-    # tracks_similarity_df = tracks_df[cols_for_similarity[:-1]]
-    # tracks_other_cols_df = tracks_df[other_cols]
-    # tracks_similarity_df = tracks_similarity_df.sort_index(axis=1)
-    # user_likes_similarity_df_mean = user_likes_similarity_df_mean.sort_index(axis=1)
-    #
-    # similarity_scores = cosine_similarity(tracks_similarity_df, user_likes_similarity_df_mean)
-    # tracks_similarity_df['relevance_percentage'] = similarity_scores
-    # tracks_similarity_df['relevance_percentage'] = tracks_similarity_df['relevance_percentage'].mul(100).round(1)
 
+def get_recommendations_by_similar_users(user_id=32):
+    pass
+    # get user like and dislikes
+    user_likes_playlist = get_tracks_df(user_id, type="like")
+    user_dislikes_playlist = get_tracks_df(user_id, type="dislike")
+    # if len(user_likes_playlist) == 0:
+    #     return []
+
+    top_ids_scores = []
+    with get_pinecone_conn('users') as users_index:
+        # get user vector from pinecone
+        retrieve_user_results = users_index.fetch(ids=[str(user_id)])
+        user_record = retrieve_user_results.get('vectors').get(str(user_id))
+
+        if not user_record:
+            return []
+        user_vector = user_record['values']
+        print(f"user_vector: {user_vector}")
+
+        # get similar user from pinecone, take top k user_id
+        # Query Pinecone 'users' index, using 'cosine' metric, to find the top most similar vectors
+        query_user_results = users_index.query(vector=user_vector, top_k=20)
+        top_ids_scores = [(match['id'], match['score']) for match in query_user_results['matches']]
+        print(f"top_ids_scores: {top_ids_scores}")
+
+    if not len(top_ids_scores):
+        return []
+
+    result = get_likes_by_user_id_score(top_ids_scores)
+    return result
+    # get user liked tracks - how? TBD
+    # filter out like and dislikes of current user
 
 if __name__ == "__main__":
     # spark = config_spark()
     print("hello")
     # preprocess(spark)
     # get_recommendations_pinecone()
+    get_recommendations_by_similar_users()
     print("end")
     # get_recommandations()
 
