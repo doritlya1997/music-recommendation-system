@@ -42,6 +42,7 @@ def get_likes(user_id: int, user_name: str):
     return crud.get_likes(user_id)
 
 
+
 @router.get("/dislike")
 def get_dislikes(user_id: int, user_name: str):
     if not crud.user_exists(user_id, user_name):
