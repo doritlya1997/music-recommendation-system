@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class User(BaseModel):
@@ -20,6 +20,8 @@ class UserTrackRequest(BaseModel):
     user_id: int
     user_name: str
     track_id: str
+    is_add_by_user: Optional[bool] = None
+    recommendation_type: Optional[str] = None
 
 
 class CSVUploadRequest(BaseModel):
