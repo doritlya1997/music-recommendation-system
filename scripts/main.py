@@ -721,27 +721,51 @@ def get_tracks_by_track_id_score(top_tracks):
     return result
 
 
-def get_likes_by_user_id_score(top_users):
+def get_likes_by_user_id_score(top_users, user_id):
     """
+    WITH
+    current_user_likes_dislikes AS (
+        SELECT likes.track_id, likes.user_id
+        FROM likes
+        WHERE user_id = 34
+        UNION
+        SELECT dislikes.track_id, dislikes.user_id
+        FROM dislikes
+        WHERE user_id = 34
+    )
     SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
     FROM (  SELECT user_id_col, relevance_percentage
-    FROM (
-        VALUES (CAST('34' AS INT), 0.99),
-                (CAST('35' AS INT), 0.88)
-        ) AS derived_table(user_id_col, relevance_percentage)) as top_users
+            FROM (
+                VALUES (CAST('34' AS INT), 0.99),
+                       (CAST('35' AS INT), 0.88)
+            ) AS derived_table(user_id_col, relevance_percentage)) as top_users
     JOIN likes ON top_users.user_id_col = likes.user_id
-    JOIN tracks ON likes.track_id = tracks.track_id;
+    JOIN tracks ON likes.track_id = tracks.track_id
+    LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
+    WHERE current_user_likes_dislikes.track_id IS NULL;
     """
 
     values_clause = ", ".join([f"(CAST('{track_id}' AS INT), {relevance_percentage})" for track_id, relevance_percentage in top_users])
     query = f"""
+        WITH
+        current_user_likes_dislikes AS (
+            SELECT likes.track_id, likes.user_id
+            FROM likes
+            WHERE user_id = {user_id}
+            UNION
+            SELECT dislikes.track_id, dislikes.user_id
+            FROM dislikes
+            WHERE user_id = {user_id}
+        )
         SELECT tracks.track_id, track_name, artist_name, top_users.relevance_percentage, year
         FROM (  SELECT user_id_col, relevance_percentage
-        FROM (
-            VALUES {values_clause}
-            ) AS derived_table(user_id_col, relevance_percentage)) as top_users
+                FROM (
+                VALUES {values_clause}
+                    ) AS derived_table(user_id_col, relevance_percentage)) as top_users
         JOIN likes ON top_users.user_id_col = likes.user_id
-        JOIN tracks ON likes.track_id = tracks.track_id;
+        JOIN tracks ON likes.track_id = tracks.track_id
+        LEFT OUTER JOIN current_user_likes_dislikes ON tracks.track_id = current_user_likes_dislikes.track_id
+        WHERE current_user_likes_dislikes.track_id IS NULL;
         """
     print(query)
 
@@ -749,7 +773,8 @@ def get_likes_by_user_id_score(top_users):
     print(result)
     return result
 
-def get_recommendations_pinecone(user_id=7):
+
+def get_recommendations__listening_history(user_id=7):
 
     cols_for_similarity = ["acousticness", "danceability", "energy", "instrumentalness", "liveness", "loudness", "mode",
                        "popularity", "speechiness", "tempo", "valence",
@@ -820,7 +845,8 @@ def get_recommendations_by_similar_users(user_id=32):
     if not len(top_ids_scores):
         return []
 
-    result = get_likes_by_user_id_score(top_ids_scores)
+    result = get_likes_by_user_id_score(top_ids_scores, user_id)
+    print(len(result))
     return result
     # get user liked tracks - how? TBD
     # filter out like and dislikes of current user
