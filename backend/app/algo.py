@@ -1,5 +1,5 @@
 import pandas as pd
-from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users, get_liked_tracks
+from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users, get_liked_tracks, get_trending_tracks
 from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone
 import random
 COLS_FOR_SIMILARITY = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence', 'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024', 'update_timestamp']
@@ -133,7 +133,10 @@ def get_combined_recommendation(user_id: int):
     combined = user_history + similar_users
 
     if not combined:
-        return []
+        trending = get_trending_tracks()
+        suggest_num = len(trending)
+        suggest_num = 50 if suggest_num > 50 else suggest_num
+        return random.sample(trending, suggest_num)
 
     # TODO: change to configvar
     sample_size = min(len(user_history), len(similar_users))

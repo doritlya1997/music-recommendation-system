@@ -217,3 +217,17 @@ def get_recommended_tracks_by_top_similar_users(top_users, user_id):
             cur.execute(query)
             tracks = cur.fetchall()
             return tracks
+
+
+def get_trending_tracks():
+    query = f"""
+        SELECT tracks.track_id, track_name, artist_name, year, '' as recommendation_type, 0 as relevance_percentage
+        FROM likes
+        JOIN tracks on likes.track_id = tracks.track_id
+        ORDER BY likes.update_timestamp DESC;
+        """
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            tracks = cur.fetchall()
+            return tracks
