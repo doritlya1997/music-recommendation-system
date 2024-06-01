@@ -19,3 +19,13 @@ def upsert_pinecone(index_name: str, vectors: list[dict]):
         if response:
             return response.get('upsertedCount')
         return 0
+
+
+def delete_ids_pinecone(index_name: str, ids: list[str]):
+    with get_pinecone_index(index_name) as index:
+        response = index.delete(ids=ids)
+        # index.delete returns empty list if delete operation was successful
+        if not response:
+            return True
+        else:
+            return False
