@@ -141,4 +141,6 @@ def get_combined_recommendation(user_id: int):
     # TODO: change to configvar
     sample_size = min(len(user_history), len(similar_users))
     shuffled_list = random.sample(combined, sample_size)
+    shuffled_list = sorted(shuffled_list, key=lambda rec: rec["relevance_percentage"], reverse=True)
+
     return shuffled_list
