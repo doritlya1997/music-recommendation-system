@@ -4,8 +4,9 @@ The client-side of the application is developed using plain HTML, CSS, and JavaS
 The backend is written in python, using Fast-Api [Fast-API](https://fastapi.tiangolo.com/) framework. 
 The application uses Postgres DB for RDS, and Pinecone DB for recommendation vector logic operations.
 
-Link to the recommendation algorithm README file: https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md
-Link for devs technical README: https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md
+Link to the recommendation **algorithm README** file : https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md
+
+Link for **devs technical README** : https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md
 
 ## Our web-app
 Our web app is hosted on Heroku, providing a reliable and scalable platform for deployment. [Heroku](https://dashboard.heroku.com/)  server.
