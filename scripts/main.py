@@ -39,7 +39,7 @@ def drop_duplicate_track_id_songs(spark: SparkSession):
         .write.csv('./data_no_duplicates.csv', header=True)
 
 
-def process_data_write_csv_just_spark(spark: SparkSession):
+def process_data_write_parquet(spark: SparkSession):
 
     # Function to process each batch
     def process_batch(feat_vec, epoch_id):
@@ -133,7 +133,7 @@ def process_data_write_csv_just_spark(spark: SparkSession):
         # spark_df = spark.createDataFrame(pandas_df)
         # spark_df.printSchema()
         # spark_df.show()
-        feat_vec.write.mode("overwrite").parquet(f"./data_ready_for_db_parquet2")
+        feat_vec.write.mode("overwrite").parquet(f"./data_ready_for_db_parquet")
 
     schemaaa = """
     track_id STRING, id INT, artist_name STRING, track_name STRING, popularity INT, year INT, genre STRING, danceability FLOAT, energy FLOAT, key INT, loudness FLOAT, mode INT, speechiness FLOAT, acousticness FLOAT, instrumentalness FLOAT, liveness FLOAT, valence FLOAT, tempo FLOAT, duration_ms INT, time_signature INT
@@ -299,15 +299,15 @@ def try_feature_scaler(spark: SparkSession):
 
 
 def preprocess(spark: SparkSession):
-    # get_track_id_counts(spark)
-    # drop_duplicate_track_id_songs(spark)
-    # process_data_write_csv_just_spark(spark)
-    # validate_result(spark)
-    # write_data_to_postgres(spark)
+    get_track_id_counts(spark)
+    drop_duplicate_track_id_songs(spark)
+    process_data_write_parquet(spark)
+    validate_result(spark)
+    write_data_to_postgres(spark)
     pass
 
 if __name__ == "__main__":
-    # spark = config_spark()
+    spark = config_spark()
     print("hello")
     # preprocess(spark)
     print("end")

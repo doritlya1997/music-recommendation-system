@@ -3,6 +3,10 @@
 ## Link to the web-app
 https://music-application-e6959040ee86.herokuapp.com/
 
+## This README.md is very technical, for more in-depth explanations of the logic, read Algorithms.md :)
+
+
+
 ### Installation for Devs:
 ````
 brew install poetry

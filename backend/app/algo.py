@@ -37,15 +37,15 @@ def weighted_mean(df, col="update_timestamp"):
 
 def update_user_mean_vector(user_id: int):
     user_liked_tracks = get_liked_tracks(user_id)
-    print(user_liked_tracks)
-    print(type(user_liked_tracks))
+    # print(user_liked_tracks)
+    # print(type(user_liked_tracks))
 
     all_columns_df = pd.DataFrame.from_records(user_liked_tracks)
     mean_columns_df = all_columns_df[COLS_FOR_SIMILARITY]
 
     # Calc mean vector
     user_mean_vector_df = weighted_mean(mean_columns_df)
-    print(user_mean_vector_df)
+    # print(user_mean_vector_df)
 
     user_vector_to_update = [
         {
@@ -73,7 +73,7 @@ def update_user_mean_vector(user_id: int):
             ]
         }
     ]
-    print(user_vector_to_update)
+    # print(user_vector_to_update)
 
     num_user_vectors_affected = upsert_pinecone('users', user_vector_to_update)
     if len(user_vector_to_update) == num_user_vectors_affected:
