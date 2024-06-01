@@ -1,7 +1,5 @@
 # Music Recommendation System Algorithm
 
-The backend is written in python, using Fast-Api [Fast-API](https://fastapi.tiangolo.com/) framework. 
-
 ## Link to the web-app
 https://music-application-e6959040ee86.herokuapp.com/
 
