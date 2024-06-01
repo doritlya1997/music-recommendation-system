@@ -1,6 +1,7 @@
 import pandas as pd
 from backend.app.crud import get_recommended_tracks_by_user_listening_history, get_recommended_tracks_by_top_similar_users, get_liked_tracks, get_trending_tracks
-from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone
+from backend.app.pinecone_crud import query_pinecone_by_vector, query_pinecone_by_ids, upsert_pinecone, \
+    delete_ids_pinecone
 import random
 COLS_FOR_SIMILARITY = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo', 'valence', 'year_2000_2004', 'year_2005_2009', 'year_2010_2014', 'year_2015_2019', 'year_2020_2024', 'update_timestamp']
 
@@ -38,7 +39,11 @@ def weighted_mean(df, col="update_timestamp"):
 def update_user_mean_vector(user_id: int):
     user_liked_tracks = get_liked_tracks(user_id)
     # print(user_liked_tracks)
-    # print(type(user_liked_tracks))
+
+    if not user_liked_tracks:
+        print(f"delete user vector: {user_id}")
+        error = delete_ids_pinecone('users', [str(user_id)])
+        return
 
     all_columns_df = pd.DataFrame.from_records(user_liked_tracks)
     mean_columns_df = all_columns_df[COLS_FOR_SIMILARITY]
