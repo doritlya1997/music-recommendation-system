@@ -7,7 +7,7 @@ https://music-application-e6959040ee86.herokuapp.com/
 
 If you want to learn how this magical system works, keep reading (and listening!)
 
-![recommendation_types.png](docs/resources/recommandation_types.png)
+![recommendation_types.png](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/bf7a7b32-bf65-4f7e-999f-8850000cdb1f)
 
 ## Pre-Processing Steps
 
@@ -42,7 +42,7 @@ If you want to learn how this magical system works, keep reading (and listening!
 - Each time the user **likes** or **removes likes** from certain tracks:
   - Calculate the mean values of his liked tracks.
     - If user has been using the App for a substantial period of time (more than a week, a month, a year...), the algo will calculate a weighted mean vector, which takes into account, that latter liked tracks will have a greater influence of the "average taste of the user".
-    - ![img_1.png](docs/resources/sort_weights.png)
+    - ![img_1.png](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/9b580fac-857a-41f1-8d5c-1d99a0fe4be9)
     - Upsert the vector into [Pinecone VectorDB](https://docs.pinecone.io/home). Meaning, if the user exists in VectorDB `users` Index, we `UPDATE` the record, else, we `INSERT` it.
   - If the user has remove all of its liked tracks we **delete** its mean vector from Pinecone VectorDB. Since we don't know the user's "average taste".
 
@@ -50,7 +50,7 @@ If you want to learn how this magical system works, keep reading (and listening!
 
 This method recommends songs similar to those the user has liked (known as Content-Based Filtering, see the picture above).
 
-![track_similarity.png](docs/resources/track_similarity.png)
+![track_similarity.png](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7d5192cc-ca1c-4d8c-9fa8-db216afe6686)
 
 ### Steps
 
@@ -64,7 +64,7 @@ This method recommends songs similar to those the user has liked (known as Conte
 
 This method is known as Collaborative Filtering (see the picture above). It finds similar users and recommends their liked songs to the current user.
 
-![user_similarity.png](docs/resources/user_similarity.png)
+![user_similarity.png](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7d9a18d1-365f-4238-ba5e-354b552ee0d8)
 
 
 #### Steps
