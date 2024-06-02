@@ -15,7 +15,7 @@ Our web app is hosted on [Heroku](https://dashboard.heroku.com/), providing a re
 - Link to the web app: [https://music-application-e6959040ee86.herokuapp.com/](https://music-application-e6959040ee86.herokuapp.com/)
 
 ____
-Before we dive into the walkthrough, we'd like to highlight the attention and care given to the development of our web app UI. We focused on design, simplicity, user experience (UX), and interactivity to ensure a smooth and enjoyable user experience. Although it was challenging, we are thrilled with the results and hope you will be too!
+Before we dive into the walkthrough, we'd like to highlight the attention and care given to the development of our web app UI. We prioritized design, simplicity, user experience (UX), and interactivity to ensure a smooth and enjoyable user experience. While it was challenging, we are thrilled with the results and hope you will be too. **Plus, you can enjoy the responsive UI on your phone!**
 ____
 
 ## Login Page
