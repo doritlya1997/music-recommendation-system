@@ -1,99 +1,86 @@
-# music-recommendation-system
+# Music Recommendation System Algorithm UI Walkthrough
 
-## Link to the web-app
-https://music-application-e6959040ee86.herokuapp.com/
+The client-side of the application is developed using plain HTML, CSS, and JavaScript (see frontend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/frontend).
 
-## This README.md is very technical, and meant for Devs.
-### For more in-depth explanations of the logic, read Algorithms.md :)
+The backend is built using Python with the [FastAPI](https://fastapi.tiangolo.com/) framework. The application utilizes PostgreSQL for its relational database and Pinecone DB for recommendation vector operations (see backend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/backend)
 
+Link to the recommendation **algorithm README**: [Algorithms_backend.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md)
 
-### Installation for Devs:
-````
-brew install poetry
-poetry config virtualenvs.in-project true 
-poetry install
-brew tap heroku/brew && brew install heroku
+Link for **devs technical README**: [README_for_dev.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md)
 
-heroku login
-heroku create music-recommendation-system
-````
+## Our Web App
 
-### When problem encountered with poetry
-````
-python3.12 -m venv myenv
-source myenv/bin/activate
-poetry env use python3.12
-source myenv/bin/activate
-pip install setuptools wheel
-python -c "import distutils"
-rm poetry.lock
-poetry lock
-poetry install
-````
+Our web app is hosted on [Heroku](https://dashboard.heroku.com/), providing a reliable and scalable platform for deployment.
 
+- Link to the web app: [https://music-application-e6959040ee86.herokuapp.com/](https://music-application-e6959040ee86.herokuapp.com/)
 
-### Creating tables into PostgresSQL Database
-- Open `pgAdmin`/`Data Grip`/ whatever tool you use, and run the scripts in: `scripts/RDS_scripts/create_table_scripts.sql`
+____
+Before we dive into the walkthrough, we'd like to highlight the attention and care given to the development of our web app UI. We prioritized design, simplicity, user experience (UX), and interactivity to ensure a smooth and enjoyable user experience. While it was challenging, we are thrilled with the results and hope you will be too. **Plus, you can enjoy the responsive UI on your phone!**
+____
 
-### Tracks Data Preparation and Loading into PostgreSQL Database
-To preprocess the 1 Million tracks dataset and load into PostgreSQL DB, we need to:
+## Login Page
 
-- Download the dataset from the [kaggle.com/Spotify_1Million_Tracks](https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------)
-- Place the dataset here: `scripts/data/spotify_data.csv`
-- Add a `scripts/secrets1.py` file with your database credentials:
-  ```
-  DATABASE_URL=postgres://... 
-  PINECONE_API_KEY=...
-  ```
-- Run `preprocess(spark)` in `scripts/main.py`
-  - It will take the `scripts/data/spotify_data.csv` and produce these folders by order:
-  - `scripts/dup_track_id.csv/`
-  - `scripts/data_no_duplicates.csv/`
-  - `scripts/data_ready_for_db.csv/`
-- Then spark will load the `scripts/data_ready_for_db.csv/` dataset into PostreSQL `tracks` table
+After the user successfully logs in, their session is managed using the web's local cache, storing their user_id and user_name. For security reasons, each user interaction with the UI involves a backend check to verify and authenticate the user. Since the local cache is editable, these backend validations are essential to ensure the security of the web app. As long as the user remains connected, the local cache ensures they are automatically redirected to the recommendation page, maintaining a seamless user experience (only if the user is valid).
 
-### Creating and Loading Tracks data into Pinecone Vector Database
-- Run `scripts/pine/create_index.py`
-- Then `scripts/pine/insert.py`
+![Login Page](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/a80e8788-2616-4794-bab8-0a5b3f4e8996)
 
+## Login Page Validation
+![Login Page Validation](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/4d89aae5-793c-4309-bea0-68a2315eac89)
 
-### Run project locally
-Like this:
-```
-uvicorn backend.app:app --host 0.0.0.0 --port 8080 
-```
-or like this:
-````
-heroku config:set DEBUG=True
-heroku local web
-````
+## Sign-up Page
+![Sign-up Page](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/51f4bb43-d9e6-48de-bcef-dc0d2af4fe88)
 
+## Sign-up Validation
+![Sign-up Validation](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/39e5d67b-a432-440b-9e2d-d2a423a1369f)
 
-### Heroku commands for Deployment
-#### Just once before the first deployment
-```
-heroku login
-heroku git:remote -a music-application
-heroku config:set DATABASE_URL=postgres://... --app music-application
-heroku config:set PINECONE_API_KEY=... --app music-application
-```
-You'll see the newly set Environment Variables in the Heroku UI > Settings > Config Vars.
-#### When you want to Deploy
-Either go to the UI, to Deploy Tab > Manual deploy > Choose a branch to deploy > main > `Deploy Branch` button.
-Or run this in your local machine:
-```
-heroku login
-heroku git:remote -a music-application
-git push heroku main
-heroku open -a music-application
-```
-### Monitoring
-#### Connect to the remote heroku bash:
-````
-heroku run bash --app music-application
-````
+## Recommendation Page
+![Recommendation Page](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/da148dd8-9bd6-4490-953d-d7c4411917d2)
 
-#### Production logs monitoring
-````
-heroku logs --tail --app  music-application
-````
+## Add Single Spotify Track Link to Favorites List 
+
+#### Insert the Spotify track link in the input text
+Notes: 
+- We can only add tracks from Spotify.
+- The tracks must be from the 1M dataset from the **Spotify_1Million_Tracks** dataset from [Kaggle](https://www.kaggle.com/datasets/amitanshjoshi/spotify-1million-tracks?source=post_page-----5780cabfe194--------------------------------).
+
+![Add Spotify Link](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/5bdb97d7-3ab7-49ab-a7b3-f01e4fbc680e)
+
+#### Popup approval the track was added (By clicking the add button)
+![Spotify Link Added](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/3423dd01-11fc-4a6a-bba0-72a19983c602)
+
+### The track added to the favorites list
+![Added as Favorite](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/c73912d1-747c-4ed2-aab5-41d9e870eb5c)
+
+* The recommendation list refreshes automatically
+
+## Add Multiple Spotify Tracks to Favorites List 
+
+#### Insert Spotify track links using upload CSV (Click upload CSV button)
+Notes: 
+- The CSV format should be one column, with `links` as the title.
+- The values of the column should be Spotify track links, one per row.
+
+![Click CSV Button](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/ef21e7eb-f214-4f96-9073-8c0a9db8a136)
+
+#### Choose CSV file window from the file system (Click open)
+![Click Open CSV](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/0646303c-fffb-4dc8-a58f-c4fc9b6782b9)
+
+### The tracks added to the favorites list
+![The Tracks Added](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/3e59267e-de74-45a2-b5d6-4005ecaeec23)
+
+* The recommendation list refreshes automatically 
+
+## Click like/dislike from the recommendation list to move the tracks to the relevant list
+![Click Like/Dislike](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/5e41ff67-8ebd-4c4a-9aa0-66fc4f175ae3)
+
+### Click the Refresh button
+* Always suggests brand-new recommendations based on the user's favorite tracks.
+* Each recommended track item in the recommendation list consists of:
+  * Metadata regarding the track (name, band, year of publish)
+  * Link to listen on Spotify
+  * Match percentage for the user
+  * A small icon indicating the source recommendation logic this track item originated from
+
+![Recommendation List](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7b3f5ff7-f1d1-407d-bfe0-bf9d0c7ba4a4)
+
+* Clicking the logout button (in the top right corner) will disconnect the user and take them back to the login page

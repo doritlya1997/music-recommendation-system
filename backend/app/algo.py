@@ -137,15 +137,22 @@ def get_combined_recommendation(user_id: int):
     similar_users = get_recommendations_by_similar_users(user_id)
     combined = user_history + similar_users
 
-    if not combined:
+    # remove duplicates
+    frozensets = [frozenset(d.items()) for d in combined]
+
+    unique_frozensets = set(frozensets)
+
+    combined_dedup = [dict(fs) for fs in unique_frozensets]
+
+    if not combined_dedup:
         trending = get_trending_tracks()
         suggest_num = len(trending)
         suggest_num = 50 if suggest_num > 50 else suggest_num
         return random.sample(trending, suggest_num)
 
-    # TODO: change to configvar
+    # TODO: change to config var
     sample_size = min(len(user_history), len(similar_users))
-    shuffled_list = random.sample(combined, sample_size)
+    shuffled_list = random.sample(combined_dedup, sample_size)
     shuffled_list = sorted(shuffled_list, key=lambda rec: rec["relevance_percentage"], reverse=True)
 
     return shuffled_list
