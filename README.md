@@ -1,9 +1,12 @@
 # Music Recommendation System Algorithm UI Walkthrough
 
-The client-side of the application is developed using plain HTML, CSS, and JavaScript. The backend is built using Python with the [FastAPI](https://fastapi.tiangolo.com/) framework. The application utilizes PostgreSQL for its relational database and Pinecone DB for recommendation vector operations.
+The client-side of the application is developed using plain HTML, CSS, and JavaScript (see frontend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/frontend).
 
-- Link to the recommendation **algorithm README**: [Algorithms_backend.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md)
-- Link for **devs technical README**: [README_for_dev.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md)
+The backend is built using Python with the [FastAPI](https://fastapi.tiangolo.com/) framework. The application utilizes PostgreSQL for its relational database and Pinecone DB for recommendation vector operations (see backend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/backend)
+
+Link to the recommendation **algorithm README**: [Algorithms_backend.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md)
+
+Link for **devs technical README**: [README_for_dev.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md)
 
 ## Our Web App
 
@@ -17,7 +20,7 @@ ____
 
 ## Login Page
 
-After the user successfully logs in, their session is managed using the web's local cache, storing their user_id and user_name. For security reasons, each user interaction with the UI involves a backend check to verify and authenticate the user. Since the local cache is editable, these backend validations are essential to ensure the security of the web app.
+After the user successfully logs in, their session is managed using the web's local cache, storing their user_id and user_name. For security reasons, each user interaction with the UI involves a backend check to verify and authenticate the user. Since the local cache is editable, these backend validations are essential to ensure the security of the web app. As long as the user remains connected, the local cache ensures they are automatically redirected to the recommendation page, maintaining a seamless user experience (only if the user is valid).
 
 ![Login Page](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/a80e8788-2616-4794-bab8-0a5b3f4e8996)
 
