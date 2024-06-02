@@ -41,7 +41,7 @@ Each time the user **likes** or **removes likes** from certain tracks, the syste
 
 1. **Calculate the Mean Values**:
     - Compute the mean values of the user's liked tracks.
-    - If the user has been using the app for a substantial period (e.g., more than a week, a month, a year), the algorithm calculates a weighted mean vector, giving more weight to recently liked tracks to better reflect the user's current taste.
+    - If the user has been using the app for a substantial period (e.g., more than a week, a month, a year), the algorithm calculates a weighted mean vector, giving more weight to recently liked tracks to reflect the user's current taste better.
     ![Weighted Mean Calculation](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/9b580fac-857a-41f1-8d5c-1d99a0fe4be9)
 
 2. **Upsert the Vector**:
@@ -64,7 +64,7 @@ This method, known as Content-Based Filtering, recommends songs similar to those
 
 ### User Similarity
 
-This method, known as Collaborative Filtering, finds similar users and recommends their liked songs to the current user.
+This method, known as collaborative filtering, finds similar users and recommends their favorite songs to the current user.
 
 ![User Similarity](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7d9a18d1-365f-4238-ba5e-354b552ee0d8)
 
@@ -72,16 +72,16 @@ This method, known as Collaborative Filtering, finds similar users and recommend
 
 1. Retrieve the user's mean vector from the VectorDB `users` index by user ID.
 2. Query the VectorDB `users` by similarity to the `current_user_mean_vector`.
-3. Get the top `k` most similar users.
+3. Get the top `k` of the most similar users.
 4. Select the liked tracks of those similar users from PostgreSQL, excluding already liked and disliked tracks of the current user.
 5. Show the recommendations.
 
 ### When the User Has No Liked Tracks
 
-To avoid showing an empty recommendation list, we select the most recent liked songs in the system by other users, effectively recommending "What's trending now."
+To avoid showing an empty recommendation list, we select the most recent songs liked by other users in the system, effectively recommending "What's trending now."
 
 ## Our Learning Curve
 
-Initially, the Track Similarity recommendation logic calculated the cosine distance of the user's vector (mean of favorite songs) against the entire tracks table. We used `Pandas` to load the tracks table for each request, which was memory-intensive and suboptimal for Heroku's limited resources.
+Initially, the Track Similarity recommendation logic calculated the cosine distance of the user's vector (mean of favorite songs) against the entire tracks table. We used `Pandas` to load the tracks table from Postgres DB for each request, which was memory-intensive and suboptimal for Heroku's limited resources.
 
-The solution was to use Pinecone VectorDB, which allowed us to apply vector operations directly against the database without loading all data into memory. This was the right choice for handling large-scale vector operations efficiently.
+The solution was Pinecone VectorDB, which allowed us to apply vector operations directly against the database without loading all data into memory. This was the right choice for handling large-scale vector operations efficiently.
