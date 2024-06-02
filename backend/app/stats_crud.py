@@ -1,7 +1,5 @@
-from typing import Optional
-
+from typing import Optional,List, Dict
 from .database import get_db
-
 
 def sign_up_report(user_id: int) -> None:
     with get_db() as conn:
@@ -72,3 +70,44 @@ def user_ignored_recommendations_report(user_id: int) -> None:
                             VALUES (%s, %s);
                         """, (user_id, 7))
             conn.commit()
+
+
+def get_user_event_counts() -> List[Dict[str, int]]:
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT event_name, COUNT(*) as event_count
+                FROM user_events
+                JOIN events_definitions ON user_events.event_id = events_definitions.event_id
+                GROUP BY event_name;
+            """)
+            result = cur.fetchall()
+            return [{"event_name": row[0], "event_count": row[1]} for row in result]
+
+
+def get_most_liked_tracks(limit: int = 10) -> List[Dict[str, int]]:
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT track_id, COUNT(*) as like_count
+                FROM user_events
+                WHERE event_id = 4  -- user_liked_recommended_track
+                GROUP BY track_id
+                ORDER BY like_count DESC
+                LIMIT %s;
+            """, (limit,))
+            result = cur.fetchall()
+            return [{"track_id": row[0], "like_count": row[1]} for row in result]
+
+
+def get_user_activity() -> List[Dict[str, int]]:
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT user_id, COUNT(*) as activity_count
+                FROM user_events
+                GROUP BY user_id
+                ORDER BY activity_count DESC;
+            """)
+            result = cur.fetchall()
+            return [{"user_id": row[0], "activity_count": row[1]} for row in result]

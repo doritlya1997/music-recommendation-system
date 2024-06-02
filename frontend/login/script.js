@@ -52,7 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('user logged in:', data);
             localStorage.setItem('user_id', data.user_id);
             localStorage.setItem('user_name', data.user_name);
-            window.location.href = '/static/recommendation/index.html';
+
+            if(data.is_admin) {
+                window.location.href = '/static/stats/index.html';
+            } else {
+                window.location.href = '/static/recommendation/index.html';
+            }
         } catch (error) {
             loginError.textContent = "An unexpected error occurred.";
         }
@@ -113,7 +118,11 @@ function verifyUser(user_id, user_name) {
     })
     .then(response => {
         if (response.ok) {
-            window.location.href = '/static/recommendation/index.html';
+            if(response.json().is_admin) {
+                window.location.href = '/static/stats/index.html';
+            } else {
+                window.location.href = '/static/recommendation/index.html';
+            }
         } else {
             handleUnauthorizedUser()
         }
