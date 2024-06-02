@@ -52,6 +52,8 @@ Each time the user **likes** or **removes likes** from certain tracks, the syste
 
 This method, known as Content-Based Filtering, recommends songs similar to those the user has liked.
 
+function: `get_recommendations_by_user_listening_history(user_id)`, file: `backend/app/algo.py`
+
 ![Track Similarity](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7d5192cc-ca1c-4d8c-9fa8-db216afe6686)
 
 #### Steps
@@ -65,6 +67,9 @@ This method, known as Content-Based Filtering, recommends songs similar to those
 ### User Similarity
 
 This method, known as Collaborative Filtering, finds similar users and recommends their liked songs to the current user.
+
+function: `get_recommendations_by_similar_users(user_id)`, file: `backend/app/algo.py`
+
 
 ![User Similarity](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/7d9a18d1-365f-4238-ba5e-354b552ee0d8)
 
