@@ -1,6 +1,6 @@
 from pinecone import Pinecone, ServerlessSpec
 
-PINECONE_API_KEY = "248cf0f2-be45-4f5e-9854-67884f601c89"
+PINECONE_API_KEY = "***"
 
 
 def preprocess():
