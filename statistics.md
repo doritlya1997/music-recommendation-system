@@ -27,11 +27,11 @@ This table maps each event ID to its corresponding event name.
 ![events_mapping_table](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/32aa7a2a-1cbd-4150-a6eb-e9fc920c8875)
 
 ### user_events Table
-![events_table](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/ed3ab617-2979-4152-b010-c08f7039a6a2)
 
 This table logs all user events, capturing every interaction triggered by users.
 
 **Example from the RDS:**
+![events_table](https://github.com/doritlya1997/music-recommendation-system/assets/64167336/ed3ab617-2979-4152-b010-c08f7039a6a2)
 
 ## Metrics Displayed
 
