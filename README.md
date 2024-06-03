@@ -1,10 +1,12 @@
-# Music Recommendation System Algorithm UI Walkthrough
+# Music Recommendation System UI Features Walkthrough
 
 The client-side of the application is developed using plain HTML, CSS, and JavaScript (see frontend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/frontend).
 
 The backend is built using Python with the [FastAPI](https://fastapi.tiangolo.com/) framework. The application utilizes PostgreSQL for its relational database and Pinecone DB for recommendation vector operations (see backend folder: https://github.com/doritlya1997/music-recommendation-system/tree/main/backend)
 
 Link to the recommendation **algorithm README**: [Algorithms_backend.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/Algorithms_backend.md)
+
+Link to the statistics and metrics README : [App Statistics.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/statistics.md)
 
 Link for **devs technical README**: [README_for_dev.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md)
 

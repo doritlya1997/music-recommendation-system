@@ -1,13 +1,15 @@
-from . import stats_reporter_crud
+from typing import Dict
+
+from . import stats_crud
 from .database import get_db
 
 
-def user_exists(user_id: int, user_name: str) -> bool:
+def user_exists(user_id: int, user_name: str) -> Dict[bool, bool]:
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, username FROM users WHERE id = %s;", (user_id,))
+            cur.execute("SELECT id, username, is_admin FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
-            return user and user['username'] == user_name
+            return {"is_user_exists": user and user['username'] == user_name, "is_admin": user['is_admin']}
 
 
 def create_user(username: str, hashed_password: str):
@@ -27,7 +29,7 @@ def authenticate_user(username: str):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id as user_id, username as user_name, hashed_password FROM users WHERE username = %s;
+                SELECT id as user_id, username as user_name, is_admin, hashed_password FROM users WHERE username = %s;
             """, (username,))
             user = cur.fetchone()
             return user
@@ -127,7 +129,7 @@ def upload_csv(user_id: int, track_ids: list):
     for track_id in track_ids:
         if add_like(user_id, track_id)[0]:
             affected_rows += 1
-            stats_reporter_crud.user_liked_recommended_track_report(user_id, track_id)
+            stats_crud.user_liked_recommended_track_report(user_id, track_id)
     return affected_rows
 
 

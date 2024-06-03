@@ -1,3 +1,6 @@
+CACHE_USER_ID_KEY = 'user_id';
+CACHE_USER_NAME_KEY = 'user_name';
+
 document.addEventListener('DOMContentLoaded', () => {
     const showLoginPassword = document.getElementById('showLoginPassword');
     const showRegisterPassword = document.getElementById('showRegisterPassword');
@@ -52,7 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('user logged in:', data);
             localStorage.setItem('user_id', data.user_id);
             localStorage.setItem('user_name', data.user_name);
-            window.location.href = '/static/recommendation/index.html';
+
+            if(data.is_admin) {
+                window.location.href = '/static/stats/index.html';
+            } else {
+                window.location.href = '/static/recommendation/index.html';
+            }
         } catch (error) {
             loginError.textContent = "An unexpected error occurred.";
         }
@@ -112,10 +120,16 @@ function verifyUser(user_id, user_name) {
         }
     })
     .then(response => {
-        if (response.ok) {
-            window.location.href = '/static/recommendation/index.html';
+        if (response.status === 404) {
+           handleUnauthorizedUser()
+        }
+        return response.json();
+    })
+    .then(data => {
+        if(data.is_admin) {
+            window.location.href = '/static/stats/index.html';
         } else {
-            handleUnauthorizedUser()
+            window.location.href = '/static/recommendation/index.html';
         }
     })
     .catch(error => {
