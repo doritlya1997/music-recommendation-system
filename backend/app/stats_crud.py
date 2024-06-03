@@ -1,5 +1,7 @@
 from typing import Optional,List, Dict
 from .database import get_db
+from psycopg2.extras import RealDictCursor
+
 
 def sign_up_report(user_id: int) -> None:
     with get_db() as conn:
@@ -74,7 +76,7 @@ def user_ignored_recommendations_report(user_id: int) -> None:
 
 def get_user_event_counts() -> List[Dict[str, int]]:
     with get_db() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 SELECT event_name, COUNT(*) as event_count
                 FROM user_events
@@ -82,12 +84,15 @@ def get_user_event_counts() -> List[Dict[str, int]]:
                 GROUP BY event_name;
             """)
             result = cur.fetchall()
-            return [{"event_name": row[0], "event_count": row[1]} for row in result]
+            print(result)
+            result_lst = [{"event_name": row["event_name"], "event_count": row["event_count"]} for row in result]
+            print(result_lst)
+            return result_lst
 
 
 def get_most_liked_tracks(limit: int = 10) -> List[Dict[str, int]]:
     with get_db() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 SELECT track_id, COUNT(*) as like_count
                 FROM user_events
@@ -97,12 +102,12 @@ def get_most_liked_tracks(limit: int = 10) -> List[Dict[str, int]]:
                 LIMIT %s;
             """, (limit,))
             result = cur.fetchall()
-            return [{"track_id": row[0], "like_count": row[1]} for row in result]
+            return [{"track_id": row["track_id"], "like_count": row["like_count"]} for row in result]
 
 
 def get_user_activity() -> List[Dict[str, int]]:
     with get_db() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 SELECT user_id, COUNT(*) as activity_count
                 FROM user_events
@@ -110,4 +115,5 @@ def get_user_activity() -> List[Dict[str, int]]:
                 ORDER BY activity_count DESC;
             """)
             result = cur.fetchall()
-            return [{"user_id": row[0], "activity_count": row[1]} for row in result]
+            return [{"user_id": row["user_id"], "activity_count": row["activity_count"]} for row in result]
+

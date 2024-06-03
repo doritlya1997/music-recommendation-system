@@ -145,7 +145,7 @@ def get_user_event_counts():
             raise HTTPException(status_code=404, detail="User event counts not found")
         return data
     except Exception as e:
-        logger.error(f"Error fetching user event counts: {str(e)}")
+        logger.error(f"Error fetching user event counts: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
