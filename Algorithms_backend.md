@@ -36,7 +36,7 @@ If you want to learn how this magical system works, keep reading (and listening)
 
 5. Insert the parquet dataset to Pinecone DB as vectors:
    - Create the tracks vectors index:  [create_index](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/pine/create_index.py)
-   - Insert tracks vectors into the tracks index:  [create_index](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/pine/insert.py)
+   - Insert tracks vectors into the tracks index:  [inert_to_index](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/pine/insert.py)
 
 ## Recommendation Logic
 
