@@ -34,6 +34,10 @@ If you want to learn how this magical system works, keep reading (and listening)
     - `validate_result(spark)`: Prints the schema and track count.
     - `write_data_to_postgres(spark)`: Writes the cleaned data to PostgreSQL.
 
+5. Insert the parquet dataset to Pinecone DB as vectors:
+   - Create the tracks vectors index:  [create_index](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/pine/create_index.py)
+   - Insert tracks vectors into the tracks index:  [create_index](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/pine/insert.py)
+
 ## Recommendation Logic
 
 ### Base Steps

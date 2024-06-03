@@ -5,6 +5,7 @@
 
 Our Music Recommendation System tracks and analyzes user interactions to provide valuable insights into user behavior and system performance. The collected metrics are stored in dedicated RDS tables (`events_definitions`, `user_events`), capturing a range of user operations within the web application.
 
+**Admin User** to show the metrics page: (username: Afeka, pass: 1234)
 ## Collected Metrics
 
 The following metrics are tracked:

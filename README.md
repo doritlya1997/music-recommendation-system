@@ -10,6 +10,8 @@ Link to the statistics and metrics README : [App Statistics.md](https://github.c
 
 Link for **devs technical README**: [README_for_dev.md](https://github.com/doritlya1997/music-recommendation-system/blob/main/README_for_dev.md)
 
+Link to the RDS create table scripts: [RDS](https://github.com/doritlya1997/music-recommendation-system/blob/main/scripts/RDS_scripts/create_table_scripts.sql)
+
 ## Our Web App
 
 Our web app is hosted on [Heroku](https://dashboard.heroku.com/), providing a reliable and scalable platform for deployment.

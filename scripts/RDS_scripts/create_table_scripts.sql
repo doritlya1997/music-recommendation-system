@@ -65,8 +65,10 @@ CREATE TABLE user_events (
     user_id INT NOT NULL,
     event_id INT NOT NULL,
     track_id VARCHAR(255) DEFAULT NULL,
-    recommendation_type VARCHAR(255) DEFAULT NULL
+    recommendation_type VARCHAR(255) DEFAULT NULL,
+    event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Inserting event definitions
 INSERT INTO events_definitions (event_id, event_name) VALUES
