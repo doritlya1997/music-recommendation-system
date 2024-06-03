@@ -34,12 +34,12 @@ def login(user: User):
             'is_admin': dbuser['is_admin']}
 
 
-@router.get("/verify_user", status_code=200)
+@router.get("/verify_user")
 def verify_user(user_id: int, user_name: str):
     result = crud.user_exists(user_id, user_name)
-    if not result.is_user_exists:
+    if not result or not result['is_user_exists']:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"is_admin": result.is_admin}
+    return {"is_admin": result['is_admin']}
 
 
 @router.get("/like")
@@ -142,7 +142,8 @@ def user_event_counts():
 
 @router.get("/metrics/most_liked_tracks")
 def most_liked_tracks(limit: int = 10):
-    return stats_crud.get_most_liked_tracks(limit)
+    result = stats_crud.get_most_liked_tracks(limit)
+    return result
 
 
 @router.get("/metrics/user_activity")

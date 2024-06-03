@@ -9,7 +9,7 @@ def user_exists(user_id: int, user_name: str) -> Dict[bool, bool]:
         with conn.cursor() as cur:
             cur.execute("SELECT id, username, is_admin FROM users WHERE id = %s;", (user_id,))
             user = cur.fetchone()
-            return {"is_user_exists": user and user['username'] == user_name, "is_admin": user.is_admin}
+            return {"is_user_exists": user and user['username'] == user_name, "is_admin": user['is_admin']}
 
 
 def create_user(username: str, hashed_password: str):
