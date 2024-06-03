@@ -5,9 +5,10 @@ from ..algo import update_user_mean_vector
 from .. import crud, algo, stats_crud
 from ..utils import hash_password, verify_password
 from ..models import Track, User, UserTrackRequest, CSVUploadRequest
-
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register")
@@ -136,16 +137,39 @@ def get_recommendations(user_id: int, user_name: str, is_from_button: bool, is_u
 ## Stats
 
 @router.get("/metrics/user_event_counts")
-def user_event_counts():
-    return stats_crud.get_user_event_counts()
+def get_user_event_counts():
+    try:
+        data = stats_crud.get_user_event_counts()
+        logger.info(f"Fetched user event counts: {data}")
+        if not data:
+            raise HTTPException(status_code=404, detail="User event counts not found")
+        return data
+    except Exception as e:
+        logger.error(f"Error fetching user event counts: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/metrics/most_liked_tracks")
-def most_liked_tracks(limit: int = 10):
-    result = stats_crud.get_most_liked_tracks(limit)
-    return result
+def get_most_liked_tracks():
+    try:
+        data = stats_crud.get_most_liked_tracks()
+        logger.info(f"Fetched most liked tracks: {data}")
+        if not data:
+            raise HTTPException(status_code=404, detail="Most liked tracks not found")
+        return data
+    except Exception as e:
+        logger.error(f"Error fetching most liked tracks: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/metrics/user_activity")
-def user_activity():
-    return stats_crud.get_user_activity()
+def get_user_activity():
+    try:
+        data = stats_crud.get_user_activity()
+        logger.info(f"Fetched user activity: {data}")
+        if not data:
+            raise HTTPException(status_code=404, detail="User activity not found")
+        return data
+    except Exception as e:
+        logger.error(f"Error fetching user activity: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

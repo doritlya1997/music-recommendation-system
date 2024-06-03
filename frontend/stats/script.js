@@ -1,4 +1,26 @@
+function getUserId() {
+    let id = localStorage.getItem(CACHE_USER_ID_KEY);
+    return id ? Number(id) : null;
+}
+
+function getUserName() {
+    return localStorage.getItem(CACHE_USER_NAME_KEY);
+}
+
+CACHE_USER_ID_KEY = 'user_id';
+CACHE_USER_NAME_KEY = 'user_name';
+
 document.addEventListener("DOMContentLoaded", function() {
+    let user_name = getUserName();
+    $("#username").text(user_name);
+
+    // Logout button functionality
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
+        window.location.href = '/';
+    });
+
     fetch('/metrics/user_event_counts')
         .then(response => response.json())
         .then(data => {
@@ -66,4 +88,51 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         })
         .catch(error => console.error('Error fetching user activity:', error));
+});
+
+// Check if user is logged in
+const user_id = localStorage.getItem('user_id');
+
+// Verify user function
+function verifyUser() {
+    const user_id = localStorage.getItem('user_id');
+    const user_name = localStorage.getItem('user_name');
+
+    if (!user_id || !user_name) {
+        return Promise.resolve(false);
+    }
+
+    return fetch(`/verify_user?user_id=${user_id}&user_name=${user_name}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.status === 404) {
+           handleUnauthorizedUser()
+        }
+        return response.json();
+    })
+    .then(data => {
+       return data.is_admin
+    })
+    .catch(error => {
+        console.error("An error occurred while verifying the user:", error);
+        return false;
+    });
+}
+
+function handleUnauthorizedUser() {
+    alert('Invalid User!!');
+    localStorage.removeItem(CACHE_USER_ID_KEY);
+    localStorage.removeItem(CACHE_USER_NAME_KEY);
+    window.location.href = '/';
+}
+verifyUser().then(isVerified => {
+    if (!isVerified) {
+        alert('Invalid User!!');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
+        window.location.href = '/';
+    }
 });

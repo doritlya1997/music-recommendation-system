@@ -35,3 +35,45 @@ canvas {
     margin-bottom: 10px;
     padding: 15px;
 }
+
+/* Logout Button */
+#logoutBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px; /* Rectangular corners */
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+#logoutBtn:hover {
+    background-color: #c82333;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+#logoutBtn:active {
+    background-color: #bd2130;
+    transform: scale(0.95); /* Slightly shrink on click */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #logoutBtn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    #logoutBtn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}

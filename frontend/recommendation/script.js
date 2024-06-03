@@ -456,9 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
 const user_id = localStorage.getItem('user_id');
 verifyUser().then(isVerified => {
     if (!isVerified) {
-        alert('Invalid User!!');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('user_name');
-        window.location.href = '/';
+        handleUnauthorizedUser()
     }
 });
