@@ -16,7 +16,7 @@ Link to the RDS create table scripts: [RDS](https://github.com/doritlya1997/musi
 
 Our web app is hosted on [Heroku](https://dashboard.heroku.com/), providing a reliable and scalable platform for deployment.
 
-- Link to the web app: [https://music-application-e6959040ee86.herokuapp.com/](https://music-application-e6959040ee86.herokuapp.com/)
+- Link to the web app: [https://music-recommendation-app-023e10c5efeb.herokuapp.com/](https://music-recommendation-app-023e10c5efeb.herokuapp.com/)
 
 ____
 Before we dive into the walkthrough, we'd like to highlight the attention and care given to the development of our web app UI. We prioritized design, simplicity, user experience (UX), and interactivity to ensure a smooth and enjoyable user experience. While it was challenging, we are thrilled with the results and hope you will be too. **Plus, you can enjoy the responsive UI on your phone!**
